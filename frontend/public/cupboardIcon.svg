@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="200" height="200">
+  <!-- Cupboard body -->
+  <rect x="30" y="40" width="140" height="120" fill="#8B4513" stroke="#000" stroke-width="2"/>
+
+  <!-- Cupboard doors -->
+  <rect x="35" y="40" width="60" height="120" fill="#deb887" stroke="#000" stroke-width="2"/>
+  <rect x="105" y="40" width="60" height="120" fill="#deb887" stroke="#000" stroke-width="2"/>
+
+  <!-- Door handles -->
+  <circle cx="55" cy="100" r="5" fill="#000"/>
+  <circle cx="145" cy="100" r="5" fill="#000"/>
+
+  <!-- Shelf -->
+  <rect x="35" y="80" width="130" height="10" fill="#a0522d" stroke="#000" stroke-width="2"/>
+
+  <!-- Cupboard legs -->
+  <rect x="45" y="160" width="20" height="20" fill="#000"/>
+  <rect x="135" y="160" width="20" height="20" fill="#000"/>
+</svg>
