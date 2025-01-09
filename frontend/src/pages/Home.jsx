@@ -24,6 +24,8 @@ const Home = ({ cupBoard, setCupboards }) => {
   useEffect(() => {
     fetchCupboards()
   }, [])
+ 
+  
   const deleteCupboard = (id) => {
 
     setCupboards((prevCupboards) => prevCupboards.filter((c) => c.id !== id));  // This properly updates the state with the filtered array.
@@ -54,10 +56,23 @@ const Home = ({ cupBoard, setCupboards }) => {
 
       {cupBoard.length > 0 ? (
         <>
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-2">
+          <div className="mt-4 ">
+          <table  className="w-full shadow-lg table-auto border border-collapse rounded-lg  text-sm overflow-y-auto">
+          <thead className="bg-gradient-to-r from-blue-500 to-blue-600 text-white ">
+                        <tr>
+                            <th className="px-4 py-3 text-center">Icon</th>
+                            <th className="px-4 py-3 text-left">Name</th>
+                            <th className="px-4 py-3 text-center">Space</th>
+                            <th className="px-4 py-3 text-center">Place</th>
+                            <th className="px-4 py-3 text-center">Costumes</th>
+                            <th className="px-4 py-3 text-center">Actions</th>
+                        </tr>
+                    </thead>
+                    
             {cupBoard.slice(0, displayCount).map((f, index) => (
-              <Card key={index} cupBoard={f.name} id={f.id} delteCupboard={deleteCupboard} />
+              <Card key={index} cupBoard={f.name} id={f.id} delteCupboard={deleteCupboard} setCupboards={setCupboards}  />
             ))}
+            </table>
           </div>
           {displayCount < cupBoard.length && (
             <div className="mt-4 flex justify-center">

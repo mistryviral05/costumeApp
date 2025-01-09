@@ -8,6 +8,7 @@ import Qrcode from './pages/Qrcode'
 import Costumes from './pages/Costumes'
 import Scan from './pages/Scan'
 import { v4 as uuidv4 } from 'uuid';
+import CreateCupboard from './pages/CreateCupboard'
 
 
 
@@ -56,13 +57,17 @@ function App() {
     }
     ,
     {
-      path: '/costumes',
+      path: '/costumes/:id',
       element: <><Costumes/></>,
     }
     ,
     {
       path: '/scanner',
       element: <><Scan/></>,
+    },
+    {
+      path: '/createCupboard',
+      element: <><CreateCupboard/></>,
     }
  ])
 

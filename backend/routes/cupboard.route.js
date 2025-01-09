@@ -31,13 +31,14 @@ router.get('/getCupboard', async (req, res) => {
 
 router.put('/updateCupboard',async(req,res)=>{
     const { name, id } = req.body;
-
+   
     try {
         const data = await Cupboard.findOneAndUpdate(
             { id }, // Find the document with the specific id
             { name }, // Update only the name field
             { new: true } // Return the updated document
         );
+ 
     
         if (data) {
         
