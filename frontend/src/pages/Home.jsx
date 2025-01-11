@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import Card from '../components/Card';
 import { HiOutlineEmojiSad } from 'react-icons/hi';
+import { ToastContainer, toast,Bounce } from 'react-toastify';
 // Remove or update this import based on your project structure
 // import { Button } from "../components/ui/button"
 
@@ -28,8 +29,19 @@ const Home = ({ cupBoard, setCupboards }) => {
   
   const deleteCupboard = (id) => {
 
-    setCupboards((prevCupboards) => prevCupboards.filter((c) => c.id !== id));  // This properly updates the state with the filtered array.
-
+    setCupboards((prevCupboards) => prevCupboards.filter((c) => c.id !== id)); 
+    toast('Cupboard deleted', {
+      position: "top-center",
+      autoClose: 1000,
+      hideProgressBar: false,
+      closeOnClick: false,
+      pauseOnHover: true,
+      draggable: true,
+      progress: undefined,
+      theme: "light",
+      transition: Bounce,
+      
+  });
 
 
   }
@@ -39,7 +51,23 @@ const Home = ({ cupBoard, setCupboards }) => {
   };
 
   return (
+    <>
+     <ToastContainer
+                position="top-right"
+                autoClose={5000}
+                hideProgressBar={false}
+                newestOnTop={false}
+                closeOnClick={false}
+                rtl={false}
+                pauseOnFocusLoss
+                draggable
+                pauseOnHover
+                theme="dark"
+                transition={Bounce}
+
+            />
     <div className="p-4 h-[79.7vh] overflow-y-auto">
+     
 
       <form className="max-w-md mx-auto">
         <label htmlFor="default-search" className="mb-2 text-sm font-medium text-gray-900 sr-only light:text-white">Search</label>
@@ -70,7 +98,7 @@ const Home = ({ cupBoard, setCupboards }) => {
                     </thead>
                     
             {cupBoard.slice(0, displayCount).map((f, index) => (
-              <Card key={index} cupBoard={f.name} id={f.id} delteCupboard={deleteCupboard} setCupboards={setCupboards}  />
+              <Card key={index} cupBoard={f.name} space={f.space} place={f.place}  id={f.id} delteCupboard={deleteCupboard} setCupboards={setCupboards}  />
             ))}
             </table>
           </div>
@@ -95,6 +123,7 @@ const Home = ({ cupBoard, setCupboards }) => {
         </div>
       )}
     </div>
+    </>
   );
 };
 

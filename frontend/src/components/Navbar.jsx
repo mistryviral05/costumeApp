@@ -3,7 +3,7 @@ import { NavLink } from 'react-router-dom';
 import {ScanLine} from 'lucide-react';
 
 
-const Navbar = ({ createCupboard }) => {
+const Navbar = () => {
     const [isOpen, setIsOpen] = useState(false); // State to control the mobile menu visibility
 
     // Toggle the mobile menu
@@ -32,7 +32,7 @@ const Navbar = ({ createCupboard }) => {
                             />
                         </svg>
                     </div>
-                    <NavLink to={'/'}><span className="cursor-pointer text-lg md:text-xl font-semibold text-gray-800">
+                    <NavLink to={'/home'}><span className="cursor-pointer text-lg md:text-xl font-semibold text-gray-800">
                         Costume Management
                     </span></NavLink>
                 </div>
@@ -40,8 +40,8 @@ const Navbar = ({ createCupboard }) => {
                 {/* Button Section (For Desktop) */}
                 <div className="hidden md:flex items-center space-x-4">
                <NavLink to={'/scanner'}> <ScanLine className='cursor-pointer' /></NavLink>
-                    <button
-                        onClick={createCupboard}
+                 <NavLink to={'/createCupboard'}>   <button
+                       
                         className="flex items-center bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg shadow-md transition-transform transform hover:scale-105"
                     >
                         <svg
@@ -59,7 +59,7 @@ const Navbar = ({ createCupboard }) => {
                             />
                         </svg>
                         Create a Cupboard
-                    </button>
+                    </button></NavLink>
                 </div>
 
                 {/* Mobile Menu Button (Hamburger Icon) */}
@@ -88,8 +88,8 @@ const Navbar = ({ createCupboard }) => {
             {isOpen && (
                 <div className="md:hidden bg-white shadow-md py-2 px-6">
                     <div className="flex flex-col items-center">
-                        <button
-                            onClick={createCupboard}
+                    <NavLink to={'/createCupboard'}>   <button
+                            
                             className="flex items-center bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg shadow-md transition-transform transform hover:scale-105 "
                         >
                             <svg
@@ -107,7 +107,7 @@ const Navbar = ({ createCupboard }) => {
                                 />
                             </svg>
                             Create a Cupboard
-                        </button>
+                        </button></NavLink>
                         {/* Add other mobile menu items here
                         <button className="text-gray-800 py-2">Link 1</button>
                         <button className="text-gray-800 py-2">Link 2</button> */}

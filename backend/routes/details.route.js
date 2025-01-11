@@ -55,6 +55,48 @@ router.get('/getCostume/:cpid', async (req, res) => {
         res.json({ success: false })
     }
 
+
+})
+router.put('/updateCostume', async (req, res) => {
+    try {
+
+        const { description, cosutmename, id } = await req.body;
+        console.log({description, cosutmename, id})
+        const data = await Details.findOneAndUpdate(
+           { id: id,},
+           { $set: {  description: description,costumename: cosutmename } },
+           { new:true}
+        )
+        if (data) {
+            res.json({ success: true, message: "Data updated",updatedData:data })
+        }else {
+            res.status(404).json({ error: "No document found with the given id" });
+        }
+    } catch (err) {
+        console.log(err)
+        res.json({ success: false })
+    }
+
+})
+
+router.put('/trasferCostume',async (req,res)=>{
+    try{
+        const {id,cpid,newCpid}= await req.body
+        const data = await Details.findOneAndUpdate(
+            {id:id,cpid:cpid},
+            {$set:{cpid:newCpid}},
+            {new:true}
+        )
+        if (data) {
+            res.json({ success: true, message: "Data Transfered" })
+        }else {
+            res.status(404).json({ error: "No document found with the given id" });
+        }
+    }catch(err){
+        console.log(err)
+        res.json({ success: false })
+
+    }
 })
 
 

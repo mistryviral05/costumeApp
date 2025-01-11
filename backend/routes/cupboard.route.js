@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const connectDb = require('../db/connectDb')
 const Cupboard = require('../models/Cupboard');
+const Details = require('../models/Details');
 connectDb();
 
 
@@ -11,7 +12,9 @@ router.post('/addCupboard', async (req, res) => {
         //store in database
         const newCupboard = new Cupboard({
             id: data.id,
-            name: data.name
+            name: data.name,
+            place:data.place,
+            space:data.space
         })
         await newCupboard.save();
 
@@ -23,6 +26,7 @@ router.post('/addCupboard', async (req, res) => {
 router.get('/getCupboard', async (req, res) => {
     try {
         const cupboards = await Cupboard.find();
+   
         res.json({ success: true, cupboards });
     } catch (error) {
         res.status(500).json({ success: false, message: error.message });
@@ -60,7 +64,8 @@ router.delete('/deleteCupboard/:id', async (req, res) => {
     try {
         const { id } = req.params;
         await Cupboard.findOneAndDelete({ id: id });
-        res.json({ success: true, message: 'Costume deleted' });
+         await Details.deleteMany({cpid:id})
+        res.json({ success: true, message: 'Cupboard and it s item deleted' });
 
     } catch (error) {
         res.status(500).json({ success: false, message: error.message });
