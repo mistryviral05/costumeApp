@@ -29,10 +29,10 @@ function App() {
 
   let newCount = count + 1;
 
-
+ 
   const handleCreateCupboard = async (formData) => {
     try {
-      const response = await fetch('http://localhost:3000/cupboards/addCupboard', {
+      const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/cupboards/addCupboard`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'

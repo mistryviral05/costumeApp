@@ -48,7 +48,7 @@ const Costumes = ({ cupboard }) => {
   const handleAddCostume = async () => {
     if (newCostume.costumename && newCostume.description) {
 
-      const response = await fetch('http://localhost:3000/cpdetails/addCostume', {
+      const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/cpdetails/addCostume`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -77,7 +77,7 @@ const Costumes = ({ cupboard }) => {
   };
 
   const fetchData = async () => {
-    const response = await fetch(`http://localhost:3000/cpdetails/getCostume/${cpid}`, {
+    const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/cpdetails/getCostume/${cpid}`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json'
@@ -101,7 +101,7 @@ const Costumes = ({ cupboard }) => {
   const handleDeleteCostume = async (id) => {
     let c = confirm("Are you sure you want to delete costume");
     if (c) {
-      const response = await fetch(`http://localhost:3000/cpdetails/deleteCostume/${id}`, {
+      const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/cpdetails/deleteCostume/${id}`, {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json'
@@ -133,7 +133,7 @@ const Costumes = ({ cupboard }) => {
 
   const handleRenaming = async() => {
    try{
-    const response = await fetch('http://localhost:3000/cpdetails/updateCostume',{
+    const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/cpdetails/updateCostume`,{
       method:'PUT',
       headers: {
         'Content-Type': 'application/json'

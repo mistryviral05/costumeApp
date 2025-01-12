@@ -18,7 +18,7 @@ const Page = () => {
       const formData = new FormData();
       formData.append('file',file);
 
-      const response = await fetch('http://localhost:3000/uploadefile',{
+      const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/uploadefile`,{
         method:'POST',
         body:formData
       })

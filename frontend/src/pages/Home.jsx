@@ -12,7 +12,7 @@ const Home = ({ cupBoard, setCupboards }) => {
 
   const fetchCupboards = async () => {
     try {
-      const response = await fetch('http://localhost:3000/cupboards/getCupboard')
+      const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/cupboards/getCupboard`)
       if (response.ok) {
         const data = await response.json()
         setCupboards(data.cupboards)

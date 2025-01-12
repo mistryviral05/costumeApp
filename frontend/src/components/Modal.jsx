@@ -9,7 +9,7 @@ export default function Modal({ setIsOpenModal, cupboardid,costumeid ,setCostume
 
   const fetchCupboards = async () => {
     try {
-      const response = await fetch('http://localhost:3000/cupboards/getCupboard');
+      const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/cupboards/getCupboard`);
       if (response.ok) {
         const data = await response.json();
         setCupboard(data.cupboards);
@@ -29,7 +29,7 @@ export default function Modal({ setIsOpenModal, cupboardid,costumeid ,setCostume
     const newCpid = selectedCupboardId;
     const id = costumeid;
     try{
-      const response = await fetch('http://localhost:3000/cpdetails/trasferCostume',{
+      const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/cpdetails/trasferCostume`,{
         method:'PUT',
         headers: {
           'Content-Type': 'application/json',
