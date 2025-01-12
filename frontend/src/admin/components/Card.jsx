@@ -105,7 +105,7 @@ const Card = ({ cupBoard, space, place, id, delteCupboard, setCupboards }) => {
                 <td className="px-4 py-4 text-center">{cupBoard.costumeCount || 0}</td>
                 <td className="px-4 py-4">
                     <div className="flex justify-center space-x-2">
-                        <NavLink to={`/costumes/${id}`}>
+                        <NavLink to={`/admin/costumes/${id}`}>
                             <button className="p-2 rounded-full hover:bg-blue-100 transition-all">
                                 <ArrowRight className="text-blue-600" size={20} />
                             </button>
@@ -120,7 +120,7 @@ const Card = ({ cupBoard, space, place, id, delteCupboard, setCupboards }) => {
                             className="p-2 rounded-full hover:bg-red-100 transition-all">
                             <Trash className="text-red-600" size={20} />
                         </button>
-                        <NavLink to={`/qrcode/${id}`}>
+                        <NavLink to={`/admin/qrcode/${id}`}>
                             <button className="p-2 rounded-full hover:bg-green-100 transition-all">
                                 <QrCode className="text-green-600" size={20} />
                             </button>

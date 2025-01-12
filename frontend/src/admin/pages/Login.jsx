@@ -105,7 +105,7 @@ const Login = () => {
                 Log in
               </button>
             </div>
-            <p className="text-sm mt-6 text-center text-gray-800">Don't have an account <NavLink to={'/signup'} className="text-blue-600 font-semibold hover:underline ml-1 whitespace-nowrap">Register here</NavLink></p>
+            <p className="text-sm mt-6 text-center text-gray-800">Don't have an account <NavLink to={'/admin/signup'} className="text-blue-600 font-semibold hover:underline ml-1 whitespace-nowrap">Register here</NavLink></p>
           </form>
         </div>
       </div>

@@ -32,15 +32,15 @@ const Navbar = () => {
                             />
                         </svg>
                     </div>
-                    <NavLink to={'/home'}><span className="cursor-pointer text-lg md:text-xl font-semibold text-gray-800">
+                    <NavLink to={'/admin/home'}><span className="cursor-pointer text-lg md:text-xl font-semibold text-gray-800">
                         Costume Management
                     </span></NavLink>
                 </div>
               
                 {/* Button Section (For Desktop) */}
                 <div className="hidden md:flex items-center space-x-4">
-               <NavLink to={'/scanner'}> <ScanLine className='cursor-pointer' /></NavLink>
-                 <NavLink to={'/createCupboard'}>   <button
+               <NavLink to={'/admin/scanner'}> <ScanLine className='cursor-pointer' /></NavLink>
+                 <NavLink to={'/admin/createCupboard'}>   <button
                        
                         className="flex items-center bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg shadow-md transition-transform transform hover:scale-105"
                     >
@@ -64,7 +64,7 @@ const Navbar = () => {
 
                 {/* Mobile Menu Button (Hamburger Icon) */}
                 <div className="md:hidden flex gap-2 items-center">
-                <NavLink to={'/scanner'}><ScanLine className='cursor-pointer' /></NavLink>
+                <NavLink to={'/admin/scanner'}><ScanLine className='cursor-pointer' /></NavLink>
                     <button onClick={toggleMenu} className="text-gray-800">
                         <svg
                             xmlns="http://www.w3.org/2000/svg"
@@ -88,7 +88,7 @@ const Navbar = () => {
             {isOpen && (
                 <div className="md:hidden bg-white shadow-md py-2 px-6">
                     <div className="flex flex-col items-center">
-                    <NavLink to={'/createCupboard'}>   <button
+                    <NavLink to={'/admin/createCupboard'}>   <button
                             
                             className="flex items-center bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg shadow-md transition-transform transform hover:scale-105 "
                         >

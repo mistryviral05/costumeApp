@@ -35,7 +35,7 @@ const Qrcode = () => {
                 </button>
                 <div id="qr-code">
 
-                    <QRCode size={256} value={`/costumes/${params}`} viewBox="0 0 256 256" />
+                    <QRCode size={256} value={`/admin/costumes/${params}`} viewBox="0 0 256 256" />
                 </div>
             </div>
 

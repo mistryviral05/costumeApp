@@ -40,7 +40,7 @@ const Signup = () => {
           </div>
 
           <div className="flex gap-2 mt-6">
-            If have account you can  <p><NavLink to={'/'} className='text-blue-700 font-bold'> login Here</NavLink></p>
+            If have account you can  <p><NavLink to={'/admin/'} className='text-blue-700 font-bold'> login Here</NavLink></p>
           </div>
 
           <div className="mt-6">
