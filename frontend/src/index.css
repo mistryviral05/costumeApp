@@ -26,4 +26,19 @@
   }
   
   
+  @keyframes scan {
+    0% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(400px);
+    }
+    100% {
+      transform: translateY(0);
+    }
+  }
+  
+  .animate-scan {
+    animation: scan 3s linear infinite;
+  }
   

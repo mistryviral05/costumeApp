@@ -16,7 +16,7 @@ const Navbar = () => {
             <div className="container mx-auto px-6 md:px-12 flex justify-between items-center h-16">
                 {/* Logo Section */}
                 <div className="flex items-center space-x-3">
-                    <div className="bg-blue-500 cursor-pointer text-white rounded-full p-2">
+                    <div className="bg-gray-900 cursor-pointer text-white rounded-full p-2">
                         <svg
                             xmlns="http://www.w3.org/2000/svg"
                             className="h-6 w-6"
@@ -42,7 +42,7 @@ const Navbar = () => {
                <NavLink to={'/admin/scanner'}> <ScanLine className='cursor-pointer' /></NavLink>
                  <NavLink to={'/admin/createCupboard'}>   <button
                        
-                        className="flex items-center bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg shadow-md transition-transform transform hover:scale-105"
+                        className="flex items-center bg-gray-900 text-white px-4 py-2 rounded-lg shadow-md transition-transform transform hover:scale-105"
                     >
                         <svg
                             xmlns="http://www.w3.org/2000/svg"
@@ -90,7 +90,7 @@ const Navbar = () => {
                     <div className="flex flex-col items-center">
                     <NavLink to={'/admin/createCupboard'}>   <button
                             
-                            className="flex items-center bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg shadow-md transition-transform transform hover:scale-105 "
+                            className="flex items-center bg-gray-900 text-white px-4 py-2 rounded-lg shadow-md transition-transform transform hover:scale-105 "
                         >
                             <svg
                                 xmlns="http://www.w3.org/2000/svg"

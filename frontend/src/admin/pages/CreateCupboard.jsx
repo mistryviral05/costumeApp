@@ -17,7 +17,7 @@ function CreateCupboard({ createCupboard }) {
     const handleSubmit = (e) => {
         e.preventDefault();
         createCupboard(formData)
-        navigate("/home")
+        navigate("/admin/home")
 
     };
 

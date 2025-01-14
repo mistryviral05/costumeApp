@@ -78,7 +78,7 @@ const Home = ({ cupBoard, setCupboards }) => {
             </svg>
           </div>
           <input type="search" id="default-search" className="block w-full p-4 ps-10 text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500 light:bg-gray-700 light:border-gray-600 light:placeholder-gray-400 light:text-white light:focus:ring-blue-500 light:focus:border-blue-500" placeholder="Search Mockups, Logos..." required />
-          <button type="submit" className="text-white absolute end-2.5 bottom-2.5 bg-blue-600 hover:bg-blue-700 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-4 py-2 light:bg-blue-600 light:hover:bg-blue-700 light:focus:ring-blue-800 transition-transform transform hover:scale-105 ">Search</button>
+          <button type="submit" className="text-white absolute end-2.5 bottom-2.5 bg-gray-900  focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-4 py-2 light:bg-blue-600 light:hover:bg-blue-700 light:focus:ring-blue-800 transition-transform transform hover:scale-105 ">Search</button>
         </div>
       </form>
 
@@ -86,7 +86,7 @@ const Home = ({ cupBoard, setCupboards }) => {
         <>
           <div className="mt-4 ">
           <table  className="w-full shadow-lg table-auto border border-collapse rounded-lg  text-sm overflow-y-auto">
-          <thead className="bg-gradient-to-r from-blue-500 to-blue-600 text-white ">
+          <thead className="bg-gradient-to-r bg-gray-900  text-white ">
                         <tr>
                             <th className="px-4 py-3 text-center">Icon</th>
                             <th className="px-4 py-3 text-left">Name</th>

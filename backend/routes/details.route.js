@@ -60,11 +60,11 @@ router.get('/getCostume/:cpid', async (req, res) => {
 router.put('/updateCostume', async (req, res) => {
     try {
 
-        const { description, cosutmename, id } = await req.body;
-        console.log({description, cosutmename, id})
+        const { description, costumename, id } = await req.body;
+        console.log({description, costumename, id})
         const data = await Details.findOneAndUpdate(
            { id: id,},
-           { $set: {  description: description,costumename: cosutmename } },
+           { $set: {  description: description,costumename: costumename } },
            { new:true}
         )
         if (data) {
