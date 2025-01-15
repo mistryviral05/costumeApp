@@ -64,6 +64,9 @@ router.delete('/deleteCupboard/:id', async (req, res) => {
     try {
         const { id } = req.params;
         await Cupboard.findOneAndDelete({ id: id });
+        const array = await Cupboard.find({cpid:id});
+        console.log(array)
+
          await Details.deleteMany({cpid:id})
         res.json({ success: true, message: 'Cupboard and it s item deleted' });
 

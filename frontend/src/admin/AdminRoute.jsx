@@ -11,6 +11,10 @@ import Login from './pages/Login';
 import Signup from './pages/Signup';
 import { ToastContainer, toast } from 'react-toastify';
 import Layout from './components/Layout';
+import Dashboard from './pages/Dashboard'
+import AllCostumes from './pages/AllCostumes';
+import Users from './pages/Users';
+import AddNewUser from './pages/AddNewUser';
 
 const AdminRoute = () => {
   const [cupboard, setCupboard] = useState([]);
@@ -103,6 +107,26 @@ const AdminRoute = () => {
           <CreateCupboard createCupboard={handleCreateCupboard} />
         
       )
+    }
+    ,
+    {
+      path: '/admin/dashboard',
+      element: <> <Layout><Dashboard/></Layout></>
+    }
+    ,
+    {
+      path: '/admin/costumes',
+      element: <> <Layout><AllCostumes/></Layout></>
+    }
+    ,
+    {
+      path: '/admin/users',
+      element: <> <Layout><Users/></Layout></>
+    }
+    ,
+    {
+      path: '/admin/users/new',
+      element: <> <Layout><AddNewUser/></Layout></>
     }
   ]);
 

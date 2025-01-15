@@ -7,6 +7,7 @@ const DetailsSchema = new Schema({
     id: String,
     costumename: String,
     description: String,
+    fileUrl:String,
     date: {
         type: String,
         default: () => new Date().toISOString(), 

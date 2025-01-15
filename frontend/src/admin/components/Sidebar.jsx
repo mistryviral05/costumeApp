@@ -15,8 +15,8 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
   const location = useLocation();
 
   const menuItems = [
-    { title: 'Dashboard', icon: <Home size={20} />, path: '/admin/home' },
-    { title: 'Cupboards', icon: <DoorClosed size={20} />, path: '/admin/cupboards' },
+    { title: 'Dashboard', icon: <Home size={20} />, path: '/admin/dashboard' },
+    { title: 'Cupboards', icon: <DoorClosed size={20} />, path: '/admin/home' },
     { title: 'All Costumes', icon: <Shirt size={20} />, path: '/admin/costumes' },
     { title: 'Users', icon: <Users size={20} />, path: '/admin/users' },
     { title: 'Add New User', icon: <UserPlus size={20} />, path: '/admin/users/new' },

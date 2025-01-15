@@ -3,13 +3,15 @@ const router = express.Router();
 const User = require('../models/User');
 const connectDb = require('../db/connectDb');
 const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
+
+require('dotenv').config();
 
 connectDb();
 
-router.post('/', async (req, res) => {
+router.post('/signup', async (req, res) => {
     try {
-        const data = req.body; // No need to await here
-      
+        const data = req.body; 
 
         if (!data) {
             return res.json({ message: "Please enter the data" });
@@ -44,5 +46,36 @@ router.post('/', async (req, res) => {
         res.json({ success: false, message: "Error occurred" });
     }
 });
+
+
+router.post('/login', async (req, res) => {
+    const { username, password } = req.body;
+    try {
+
+
+        const isUsername = await User.findOne({ username: username });
+        if (!isUsername) {
+            return res.json({ succes: false, message: "Username or password invalid" });
+        }
+
+        const isPassword = await bcrypt.compare(password, isUsername.password)
+
+
+        if (!isPassword) {
+            return res.json({ succes: false, message: "Username or password invalid" });
+        }
+        const token = jwt.sign({ username: username, email: isUsername.email, name: isUsername.name }, process.env.JWT_SECRET, { expiresIn: '1h' });
+        res.cookie('token', token);
+        
+        res.json({ succes: true, message: "user logged in" })
+
+
+    } catch (err) { console.log(err); return res.json({ succes: false, message: "error comes" }) }
+
+
+
+})
+
+
 
 module.exports = router;

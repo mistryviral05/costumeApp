@@ -5,7 +5,6 @@ import { useParams } from 'react-router-dom';
 import { v4 as uuidv4 } from 'uuid';
 import Notfound from './Notfound';
 import Modal from '../components/Modal';
-
 import { ToastContainer, toast, Bounce } from 'react-toastify';
 
 const Costumes = ({ cupboard }) => {
@@ -13,6 +12,8 @@ const Costumes = ({ cupboard }) => {
   const params = useParams();
   const cpid = params.id;
   const id = uuidv4();
+  const [isValidCupboard, setIsValidCupboard] = useState(true);
+  const [isLoading, setIsLoading] = useState(true);
 
   const [costumes, setCostumes] = useState([]);
   const [newCostume, setNewCostume] = useState({ costumename: '', description: '' });
@@ -22,6 +23,7 @@ const Costumes = ({ cupboard }) => {
   const [seletectedid, setSeletectedid] = useState(null);
   const [isRenaming, setIsRenaming] = useState(null);
   const [renaming, setRenaming] = useState({ costumename: '', description: '', id: '' });
+  const [file, setFile] = useState(null);
 
   const handleSearch = (e) => {
     let query = e.target.value.toLowerCase();
@@ -37,18 +39,35 @@ const Costumes = ({ cupboard }) => {
   };
 
   const handleAddCostume = async () => {
+    const formData = new FormData();
+    formData.append('file', file);
+    let fileUrl = null;
+
+    try {
+      const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/uploadefile`, {
+        method: 'POST',
+        body: formData
+      });
+      if (res.ok) {
+        const data = await res.json();
+        fileUrl = data.fileUrl;
+      }
+    } catch (err) {
+      console.log(err);
+    }
+
     if (newCostume.costumename && newCostume.description) {
       const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/cpdetails/addCostume`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ cpid: cpid, id: id, costumename: newCostume.costumename, description: newCostume.description })
+        body: JSON.stringify({ cpid: cpid, id: id, costumename: newCostume.costumename, description: newCostume.description, fileUrl: fileUrl })
       });
       if (response.ok) {
         const res = await response.json();
-        setCostumes([...costumes, { id: id, ...newCostume }]);
-        setFilterData([...filterData, { id: id, ...newCostume }]);
+        setCostumes([...costumes, { id: id, ...newCostume, fileUrl }]);
+        setFilterData([...filterData, { id: id, ...newCostume, fileUrl }]);
         toast('Data added', {
           position: "top-center",
           autoClose: 1000,
@@ -60,26 +79,43 @@ const Costumes = ({ cupboard }) => {
           transition: Bounce,
         });
         setNewCostume({ costumename: '', description: '' });
+        setFile(null);
       }
     }
   };
 
   const fetchData = async () => {
-    const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/cpdetails/getCostume/${cpid}`, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-    });
-    const data = await response.json();
-    const Array = await data.data;
-    setCostumes(Array);
-    setFilterData(Array);
+    setIsLoading(true);
+    try {
+      const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/cupboards/getCupboard`);
+      if (response.ok) {
+        const data = await response.json();
+        const cupboardExists = data.cupboards.some(cupboard => cupboard.id === cpid);
+        setIsValidCupboard(cupboardExists);
+        
+        if (cupboardExists) {
+          const costumeResponse = await fetch(`${import.meta.env.VITE_BACKEND_URL}/cpdetails/getCostume/${cpid}`, {
+            method: 'GET',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+          });
+          const costumeData = await costumeResponse.json();
+          setCostumes(costumeData.data);
+          setFilterData(costumeData.data);
+        }
+      }
+    } catch (err) {
+      console.log(err);
+      setIsValidCupboard(false);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   useEffect(() => {
     fetchData();
-  }, []);
+  }, [cpid]);
 
   const handleDeleteCostume = async (id) => {
     let c = confirm("Are you sure you want to delete costume?");
@@ -135,6 +171,8 @@ const Costumes = ({ cupboard }) => {
           transition: Bounce,
         });
         setIsRenaming(false);
+        // Refresh the costumes list after update
+        fetchData();
       }
     } catch (err) {
       console.log(err);
@@ -143,11 +181,33 @@ const Costumes = ({ cupboard }) => {
 
   const handleOpenRenaming = (id) => {
     setIsRenaming(id);
+    // Find the current costume data
+    const costume = costumes.find(c => c.id === id);
+    if (costume) {
+      setRenaming({
+        costumename: costume.costumename,
+        description: costume.description,
+        id: costume.id
+      });
+    }
   };
 
   const handleCloseRenaming = () => {
     setIsRenaming(null);
+    setRenaming({ costumename: '', description: '', id: '' });
   };
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-gray-900"></div>
+      </div>
+    );
+  }
+
+  if (!isValidCupboard) {
+    return <Notfound />;
+  }
 
   return (
     <>
@@ -164,7 +224,7 @@ const Costumes = ({ cupboard }) => {
         theme="dark"
         transition={Bounce}
       />
-        <div className="font-sans max-w-5xl max-md:max-w-xl mx-auto bg-white py-4">
+      <div className="font-sans max-w-5xl max-md:max-w-xl mx-auto bg-white py-4">
         <button
           onClick={() => navigate(-1)}
           className="bg-gray-800 hover:bg-gray-900 text-white py-2 px-4 rounded mb-4 transition duration-200"
@@ -182,7 +242,7 @@ const Costumes = ({ cupboard }) => {
               <div key={costume.id} className="grid grid-cols-3 items-start gap-4 bg-white p-4 rounded-lg shadow-sm border border-gray-100">
                 <div className="col-span-2 flex items-start gap-4">
                   <div className="w-28 h-28 max-sm:w-24 max-sm:h-24 shrink-0 bg-gray-100 p-2 rounded-md">
-                    <img src="https://cdn.pixabay.com/photo/2013/07/13/14/08/apparel-162192_1280.png" alt="Costume" className="w-full h-full object-contain" />
+                    <img src={`${costume.fileUrl}`} alt="Costume" className="w-full h-full object-contain hover:scale-110 transition-transform duration-300 cursor-pointer hover:absolute z-10 hover:top-0 hover:right-52" />
                   </div>
 
                   <div className="flex flex-col">
@@ -201,7 +261,7 @@ const Costumes = ({ cupboard }) => {
                         <input
                           type="text"
                           value={renaming.description}
-                          onChange={(e) => setRenaming({ ...renaming, description: e.target.value, id: costume.id })}
+                          onChange={(e) => setRenaming({ ...renaming, description: e.target.value })}
                           className="w-full border border-gray-300 rounded-lg px-4 py-2 mt-2"
                         />
                       ) : costume.description}
@@ -280,6 +340,14 @@ const Costumes = ({ cupboard }) => {
                   placeholder="Description"
                   value={newCostume.description}
                   onChange={(e) => setNewCostume({ ...newCostume, description: e.target.value })}
+                  className="px-4 py-2.5 bg-white text-gray-800 rounded-md w-full text-sm border-b focus:border-gray-800 outline-none"
+                />
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) => {
+                    setFile(e.target.files[0]);
+                  }}
                   className="px-4 py-2.5 bg-white text-gray-800 rounded-md w-full text-sm border-b focus:border-gray-800 outline-none"
                 />
               </div>

@@ -2,6 +2,8 @@ const express = require('express')
 const router = express.Router();
 const Details = require('../models/Details')
 const connectDb = require('../db/connectDb')
+const path = require('path')
+const fs = require('fs')
 connectDb();
 
 
@@ -10,6 +12,7 @@ router.post('/addCostume', async (req, res) => {
 
 
         const data = await req.body;
+        console.log(data);
         if (!data.cpid) {
             res.json({ success: false })
         }
@@ -24,10 +27,17 @@ router.post('/addCostume', async (req, res) => {
 router.delete('/deleteCostume/:id', async (req, res) => {
     try {
         const { id } = await req.params;
+
         const isAvailableId = await Details.findOne({ id: id });
         if (isAvailableId) {
-
+            const img = isAvailableId.fileUrl;
+            const filePath = path.join(__dirname, '../', img.replace('http://localhost:3000/', ''));
             await Details.findOneAndDelete({ id: id });
+            if (fs.existsSync(filePath)) {
+                fs.unlink(filePath, (err) => {
+                    console.log(err);
+                })
+            }
             res.json({ success: true, message: "Data Deleted" })
         } else {
             res.json({ success: false })
@@ -57,19 +67,35 @@ router.get('/getCostume/:cpid', async (req, res) => {
 
 
 })
+router.get('/getCostume', async (req, res) => {
+    try {
+
+
+        const data = await Details.find();
+
+        if (data) {
+            res.json({ success: true, data });
+        }
+    } catch (err) {
+        console.log(err)
+        res.json({ success: false })
+    }
+
+
+})
 router.put('/updateCostume', async (req, res) => {
     try {
 
         const { description, costumename, id } = await req.body;
-        console.log({description, costumename, id})
+        console.log({ description, costumename, id })
         const data = await Details.findOneAndUpdate(
-           { id: id,},
-           { $set: {  description: description,costumename: costumename } },
-           { new:true}
+            { id: id, },
+            { $set: { description: description, costumename: costumename } },
+            { new: true }
         )
         if (data) {
-            res.json({ success: true, message: "Data updated",updatedData:data })
-        }else {
+            res.json({ success: true, message: "Data updated", updatedData: data })
+        } else {
             res.status(404).json({ error: "No document found with the given id" });
         }
     } catch (err) {
@@ -79,20 +105,20 @@ router.put('/updateCostume', async (req, res) => {
 
 })
 
-router.put('/trasferCostume',async (req,res)=>{
-    try{
-        const {id,cpid,newCpid}= await req.body
+router.put('/trasferCostume', async (req, res) => {
+    try {
+        const { id, cpid, newCpid } = await req.body
         const data = await Details.findOneAndUpdate(
-            {id:id,cpid:cpid},
-            {$set:{cpid:newCpid}},
-            {new:true}
+            { id: id, cpid: cpid },
+            { $set: { cpid: newCpid } },
+            { new: true }
         )
         if (data) {
             res.json({ success: true, message: "Data Transfered" })
-        }else {
+        } else {
             res.status(404).json({ error: "No document found with the given id" });
         }
-    }catch(err){
+    } catch (err) {
         console.log(err)
         res.json({ success: false })
 
