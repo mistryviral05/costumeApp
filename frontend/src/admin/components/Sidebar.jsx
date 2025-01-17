@@ -7,7 +7,8 @@ import {
   UserPlus, 
   ChevronLeft, 
   Menu,
-  Home
+  Home,
+  GalleryVertical
 } from 'lucide-react';
 
 const Sidebar = ({ isOpen, setIsOpen }) => {
@@ -18,6 +19,7 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
     { title: 'Dashboard', icon: <Home size={20} />, path: '/admin/dashboard' },
     { title: 'Cupboards', icon: <DoorClosed size={20} />, path: '/admin/home' },
     { title: 'All Costumes', icon: <Shirt size={20} />, path: '/admin/costumes' },
+    { title: 'Gallary', icon: <GalleryVertical size={20} />, path: '/admin/gallary' },
     { title: 'Users', icon: <Users size={20} />, path: '/admin/users' },
     { title: 'Add New User', icon: <UserPlus size={20} />, path: '/admin/users/new' },
   ];

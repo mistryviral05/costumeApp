@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Pencil, Trash2, Check, X, Plus, Search } from 'lucide-react';
+import { v4 as uuidv4 } from 'uuid';
 
 // Sample data - replace with your actual data
 const initialCostumes = [
@@ -28,18 +29,37 @@ const AllCostumes = () => {
   const [isAddingNew, setIsAddingNew] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [newCostume, setNewCostume] = useState({
-    id: null,
-    image: "",
-    name: "",
-    color: "",
-    location: "",
-    cupboard: "",
-  });
 
+    costumename: "",
+    description: "",
+    cpid: "",
+  });
+  const [file, setFile] = useState(null);
+  const [cupboards, setCupboards] = useState([])
+
+  const id = uuidv4();
 
 
 
   const fetchData = async () => {
+
+    try {
+      const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/cupboards/getCupboard`);
+      if (response.ok) {
+        const data = await response.json();
+        setCupboards(data.cupboards)
+
+      }
+
+
+    } catch (err) {
+      console.log(err)
+
+    }
+
+
+
+
     const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/cpdetails/getCostume`, {
       method: 'GET',
       headers: {
@@ -48,10 +68,10 @@ const AllCostumes = () => {
     });
     const data = await response.json();
     const Array = await data.data;
-  
+
     setCostumes(Array)
-    console.log(Array)
-   
+
+
   };
 
   useEffect(() => {
@@ -91,30 +111,68 @@ const AllCostumes = () => {
     setNewCostume({ ...newCostume, [field]: value });
   };
 
-  const handleAddNewCostume = () => {
-    if (newCostume.name && newCostume.image) {
-      const newId = Math.max(...costumes.map(c => c.id), 0) + 1;
-      setCostumes([...costumes, { ...newCostume, id: newId }]);
-      setNewCostume({
-        id: null,
-        fileUrl: "",
-        costumename: "",
-        description: "",
-        // location: "",
-        // cupboard: "",
+  const handleAddNewCostume = async () => {
+
+    let fileUrl = null;
+    try {
+      const formData = new FormData();
+      formData.append('file', file)
+      const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/uploadefile`, {
+        method: 'POST',
+        body: formData
       });
-      setIsAddingNew(false);
+      if (res.ok) {
+        const data = await res.json();
+        fileUrl = data.fileUrl;
+      }
+
+
+
+
+    } catch (err) {
+      console.log(err);
+    }
+
+
+
+    if (newCostume.cpid) {
+      
+    
+
+      const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/cpdetails/addCostume`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ cpid: newCostume.cpid, id: id, costumename: newCostume.costumename, description: newCostume.description, fileUrl: fileUrl })
+      });
+      if(response.ok){
+        setCostumes([...costumes, { ...newCostume, id: id ,fileUrl:fileUrl,place:cupboards.place,cpname:cupboards.name}]);
+        setNewCostume({
+          id: null,
+          fileUrl: "",
+          costumename: "",
+          description: "",
+          cpid: "",
+  
+        });
+        setIsAddingNew(false);
+
+      }
+
+     
     } else {
       alert('Please fill in at least the image URL and name fields');
     }
   };
+
 
   // Filter costumes based on search query
   const filteredCostumes = costumes.filter(costume => {
     const searchLower = searchQuery.toLowerCase();
     return (
       costume.costumename.toLowerCase().includes(searchLower) ||
-      costume.description.toLowerCase().includes(searchLower) 
+      costume.description.toLowerCase().includes(searchLower)
       // costume.location.toLowerCase().includes(searchLower) ||
       // costume.cupboard.toLowerCase().includes(searchLower)
     );
@@ -149,21 +207,22 @@ const AllCostumes = () => {
           <h2 className="text-lg font-semibold mb-4">Add New Costume</h2>
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Image URL</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Choose Image</label>
               <input
-                type="text"
-                value={newCostume.image}
-                onChange={(e) => handleNewCostumeChange('image', e.target.value)}
-                className="w-full border rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                placeholder="Enter image URL"
+                type="file"
+                accept="image/*"
+                onChange={(e) => {
+                  setFile(e.target.files[0]);
+                }}
+                className="px-4 py-2.5 bg-white text-gray-800 rounded-md w-full text-sm border focus:border-gray-800 outline-none"
               />
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Name</label>
               <input
                 type="text"
-                value={newCostume.name}
-                onChange={(e) => handleNewCostumeChange('name', e.target.value)}
+                value={newCostume.costumename}
+                onChange={(e) => handleNewCostumeChange('costumename', e.target.value)}
                 className="w-full border rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 placeholder="Enter costume name"
               />
@@ -172,31 +231,30 @@ const AllCostumes = () => {
               <label className="block text-sm font-medium text-gray-700 mb-1">Color</label>
               <input
                 type="text"
-                value={newCostume.color}
-                onChange={(e) => handleNewCostumeChange('color', e.target.value)}
+                value={newCostume.description}
+                onChange={(e) => handleNewCostumeChange('description', e.target.value)}
                 className="w-full border rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 placeholder="Enter color"
               />
             </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Location</label>
-              <input
-                type="text"
-                value={newCostume.location}
-                onChange={(e) => handleNewCostumeChange('location', e.target.value)}
-                className="w-full border rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                placeholder="Enter location"
-              />
-            </div>
+
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Cupboard</label>
-              <input
-                type="text"
-                value={newCostume.cupboard}
-                onChange={(e) => handleNewCostumeChange('cupboard', e.target.value)}
-                className="w-full border rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                placeholder="Enter cupboard"
-              />
+              <select
+                id="cpid"
+                value={newCostume.cpid}
+                onChange={(e) => handleNewCostumeChange('cpid', e.target.value)}
+                className="w-full rounded-xl border focus:ring-2 focus:ring-blue-500 focus:border-blue-500 shadow-sm text-gray-800 py-3 px-4"
+                required
+              >
+
+                <option value="">Select a Cupboard</option>
+                {cupboards.map((e, i) => (
+
+                  <option key={i} value={`${e.id}`}>{e.name}</option>
+                ))}
+
+              </select>
             </div>
             <div className="flex items-end">
               <div className="flex gap-2">
@@ -297,7 +355,7 @@ const AllCostumes = () => {
                       className="text-sm border rounded px-2 py-1 w-full focus:outline-none focus:border-blue-500"
                     />
                   ) : (
-                    <div className="text-sm text-gray-600">{/*costume.location*/}hostel</div>
+                    <div className="text-sm text-gray-600">{costume.place}</div>
                   )}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
@@ -309,7 +367,7 @@ const AllCostumes = () => {
                       className="text-sm border rounded px-2 py-1 w-full focus:outline-none focus:border-blue-500"
                     />
                   ) : (
-                    <div className="text-sm text-gray-600">{/*costume.cupboard*/}cp-2</div>
+                    <div className="text-sm text-gray-600">{costume.cpname}</div>
                   )}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">

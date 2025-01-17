@@ -2,6 +2,7 @@ const express = require('express')
 const router = express.Router();
 const Details = require('../models/Details')
 const connectDb = require('../db/connectDb')
+const Cupboard = require('../models/Cupboard');
 const path = require('path')
 const fs = require('fs')
 connectDb();
@@ -12,11 +13,21 @@ router.post('/addCostume', async (req, res) => {
 
 
         const data = await req.body;
-        console.log(data);
         if (!data.cpid) {
-            res.json({ success: false })
+            return res.json({ success: false })
         }
-        const newDetails = new Details(data);
+        const cupDet = await Cupboard.findOne({ id: data.cpid });
+        console.log(cupDet.name);
+        console.log(cupDet.place);
+        const newDetails = new Details({
+            cpid: data.cpid,
+            id: data.id,
+            cpname: cupDet.name,
+            place: cupDet.place,
+            costumename: data.costumename,
+            description: data.description,
+            fileUrl: data.fileUrl
+        });
         await newDetails.save();
         res.json({ success: true })
     } catch (err) {
@@ -31,7 +42,8 @@ router.delete('/deleteCostume/:id', async (req, res) => {
         const isAvailableId = await Details.findOne({ id: id });
         if (isAvailableId) {
             const img = isAvailableId.fileUrl;
-            const filePath = path.join(__dirname, '../', img.replace('http://localhost:3000/', ''));
+            const filePath = path.join(__dirname, '../', img.replace('http://localhost:3002/', ''));
+            console.log(filePath)
             await Details.findOneAndDelete({ id: id });
             if (fs.existsSync(filePath)) {
                 fs.unlink(filePath, (err) => {
@@ -108,9 +120,10 @@ router.put('/updateCostume', async (req, res) => {
 router.put('/trasferCostume', async (req, res) => {
     try {
         const { id, cpid, newCpid } = await req.body
+        const detail = await Cupboard.findOne({ id: newCpid });
         const data = await Details.findOneAndUpdate(
             { id: id, cpid: cpid },
-            { $set: { cpid: newCpid } },
+            { $set: { cpid: newCpid, cpname: detail.name, place: detail.place } },
             { new: true }
         )
         if (data) {

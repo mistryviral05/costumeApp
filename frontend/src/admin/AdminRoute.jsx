@@ -15,6 +15,7 @@ import Dashboard from './pages/Dashboard'
 import AllCostumes from './pages/AllCostumes';
 import Users from './pages/Users';
 import AddNewUser from './pages/AddNewUser';
+import Gallary from './pages/Gallary';
 
 const AdminRoute = () => {
   const [cupboard, setCupboard] = useState([]);
@@ -127,6 +128,11 @@ const AdminRoute = () => {
     {
       path: '/admin/users/new',
       element: <> <Layout><AddNewUser/></Layout></>
+    }
+    ,
+    {
+      path: '/admin/gallary',
+      element: <> <Gallary/></>
     }
   ]);
 

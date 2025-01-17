@@ -5,6 +5,8 @@ const Schema = mongoose.Schema;
 const DetailsSchema = new Schema({
     cpid:String,
     id: String,
+    cpname:String,
+    place:String,
     costumename: String,
     description: String,
     fileUrl:String,

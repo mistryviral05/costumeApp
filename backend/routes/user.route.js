@@ -11,7 +11,7 @@ connectDb();
 
 router.post('/signup', async (req, res) => {
     try {
-        const data = req.body; 
+        const data = req.body;
 
         if (!data) {
             return res.json({ message: "Please enter the data" });
@@ -66,7 +66,7 @@ router.post('/login', async (req, res) => {
         }
         const token = jwt.sign({ username: username, email: isUsername.email, name: isUsername.name }, process.env.JWT_SECRET, { expiresIn: '1h' });
         res.cookie('token', token);
-        
+
         res.json({ succes: true, message: "user logged in" })
 
 

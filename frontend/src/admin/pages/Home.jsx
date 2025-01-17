@@ -110,7 +110,7 @@ const Home = ({ cupBoard, setCupboards }) => {
           <>
             <div className="mt-4 ">
               <table className="w-full shadow-lg table-auto border border-collapse rounded-lg  text-sm overflow-y-auto">
-                <thead className="bg-gradient-to-r bg-gray-900  text-white ">
+                <thead className="bg-gradient-to-r bg-gray-50  text-gray-500 ">
                   <tr>
                     <th className="px-4 py-3 text-center">Icon</th>
                     <th className="px-4 py-3 text-left">Name</th>
