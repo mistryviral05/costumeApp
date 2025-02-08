@@ -26,6 +26,7 @@ const Login = () => {
   const handleSubmit = async(e) => {
     e.preventDefault();
     try{
+      console.log(formData)
         const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/users/login`,{
           method:'POST',
           headers:{

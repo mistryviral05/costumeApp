@@ -15,8 +15,11 @@ import Dashboard from './pages/Dashboard'
 import AllCostumes from './pages/AllCostumes';
 import Users from './pages/Users';
 import AddNewUser from './pages/AddNewUser';
-import Gallary from './pages/Gallary';
-
+import Gallary from './pages/Gallary/Gallary';
+import DetailsCostume from './pages/DetailsCostume';
+import AddNewCostume from './pages/AddNewCostume';
+import AuthProtected from './middleware/AuthProtected'
+import Cart from './pages/Gallary/Cart';
 const AdminRoute = () => {
   const [cupboard, setCupboard] = useState([]);
   const [count, setCount] = useState(0);
@@ -64,9 +67,12 @@ const AdminRoute = () => {
     {
       path: '/admin/home',
       element: (
+        <AuthProtected>
+
         <Layout>
           <Home cupBoard={cupboard} setCupboards={setCupboard} />
         </Layout>
+        </AuthProtected>
       )
     },
     {
@@ -80,60 +86,84 @@ const AdminRoute = () => {
     {
       path: '/admin/qrcode/:params',
       element: (
-       
+        <AuthProtected>
+
           <Qrcode />
+        </AuthProtected>
        
       )
     },
     {
       path: '/admin/costumes/:id',
       element: (
-        
+        <AuthProtected>
+
           <Costumes />
+        </AuthProtected>
         
       )
     },
     {
       path: '/admin/scanner',
       element: (
-        
+        <AuthProtected>
+
           <Scan />
+        </AuthProtected>
        
       )
     },
     {
       path: '/admin/createCupboard',
       element: (
-        
+        <AuthProtected>
+
           <CreateCupboard createCupboard={handleCreateCupboard} />
+        </AuthProtected>
         
       )
     }
     ,
     {
       path: '/admin/dashboard',
-      element: <> <Layout><Dashboard/></Layout></>
+      element: <> <AuthProtected> <Layout><Dashboard/></Layout></AuthProtected></>
     }
     ,
     {
       path: '/admin/costumes',
-      element: <> <Layout><AllCostumes/></Layout></>
+      element: <> <AuthProtected><Layout><AllCostumes/></Layout></AuthProtected></>
     }
     ,
     {
       path: '/admin/users',
-      element: <> <Layout><Users/></Layout></>
+      element: <> <AuthProtected><Layout><Users/></Layout></AuthProtected></>
     }
     ,
     {
       path: '/admin/users/new',
-      element: <> <Layout><AddNewUser/></Layout></>
+      element: <> <AuthProtected><Layout><AddNewUser/></Layout></AuthProtected></>
     }
     ,
     {
       path: '/admin/gallary',
-      element: <> <Gallary/></>
+      element: <> <AuthProtected><Gallary/></AuthProtected></>
     }
+    ,
+    {
+      path: '/admin/costumeDetails',
+      element: <> <AuthProtected><DetailsCostume/></AuthProtected></>
+    }
+    ,
+    {
+      path: '/admin/addNewCostume',
+      element: <> <AuthProtected><Layout><AddNewCostume/></Layout></AuthProtected></>
+    }
+    ,
+    {
+      path: '/admin/Gallary/cart',
+      element: <> <AuthProtected><Cart/></AuthProtected></>
+    }
+  
   ]);
 
   return (

@@ -2,6 +2,9 @@ const express = require('express');
 const router = express.Router();
 const multer  = require('multer')
 const path = require('path');
+const { uplode } = require('../controllers/uploadFileController');
+
+
 
 const storage = multer.diskStorage({
     destination: function (req, file, cb) {
@@ -14,23 +17,7 @@ const storage = multer.diskStorage({
   })
   const upload = multer({ storage: storage })
 
-  router.post('/', upload.single('file'), (req, res) => {
-  try {
-    const uploadedFile = req.file;
-
-    const fileUrl = `${req.protocol}://${req.get('host')}/uploads/${uploadedFile.filename}`;
-
-    res.status(200).json({
-      message: 'File uploaded successfully',
-      fileUrl,
-    });
-  } catch (error) {
-    res.status(500).json({
-      error: 'File upload failed',
-      details: error.message,
-    });
-  }
-});
+  router.post('/', upload.single('file'), uplode);
 
 
 

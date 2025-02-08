@@ -7,8 +7,6 @@ import AdminRoute from './admin/AdminRoute';
 function App() {
 
 
-  
-
   return  <AdminRoute/>
 }
 

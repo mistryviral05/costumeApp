@@ -8,7 +8,8 @@ import {
   ChevronLeft, 
   Menu,
   Home,
-  GalleryVertical
+  GalleryVertical,
+  
 } from 'lucide-react';
 
 const Sidebar = ({ isOpen, setIsOpen }) => {
@@ -22,6 +23,7 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
     { title: 'Gallary', icon: <GalleryVertical size={20} />, path: '/admin/gallary' },
     { title: 'Users', icon: <Users size={20} />, path: '/admin/users' },
     { title: 'Add New User', icon: <UserPlus size={20} />, path: '/admin/users/new' },
+    { title: 'Add New Costume', icon: <Shirt size={20} />, path: '/admin/addNewCostume' },
   ];
 
   return (

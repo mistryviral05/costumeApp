@@ -242,7 +242,7 @@ const Costumes = ({ cupboard }) => {
               <div key={costume.id} className="grid grid-cols-3 items-start gap-4 bg-white p-4 rounded-lg shadow-sm border border-gray-100">
                 <div className="col-span-2 flex items-start gap-4">
                   <div className="w-28 h-28 max-sm:w-24 max-sm:h-24 shrink-0 bg-gray-100 p-2 rounded-md">
-                    <img src={`${costume.fileUrl}`} alt="Costume" className="w-full h-full object-contain hover:scale-110 transition-transform duration-300 cursor-pointer hover:absolute z-10 hover:top-0 hover:right-52" />
+                    <img src={`${costume.fileUrl}`} alt="Costume" className="w-full h-full object-contain " />
                   </div>
 
                   <div className="flex flex-col">

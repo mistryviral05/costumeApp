@@ -136,8 +136,8 @@ const AllCostumes = () => {
 
 
     if (newCostume.cpid) {
-      
-    
+
+
 
       const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/cpdetails/addCostume`, {
         method: 'POST',
@@ -146,21 +146,28 @@ const AllCostumes = () => {
         },
         body: JSON.stringify({ cpid: newCostume.cpid, id: id, costumename: newCostume.costumename, description: newCostume.description, fileUrl: fileUrl })
       });
-      if(response.ok){
-        setCostumes([...costumes, { ...newCostume, id: id ,fileUrl:fileUrl,place:cupboards.place,cpname:cupboards.name}]);
+      if (response.ok) {
+
+        setCostumes([...costumes, {
+          ...newCostume,
+          id: id,
+          fileUrl: fileUrl,
+          place: cupboards.find(cupboard => cupboard.id === newCostume.cpid)?.place,  // Assuming `location` is the field
+          cpname: cupboards.find(cupboard => cupboard.id === newCostume.cpid)?.name  // Assuming `name` is the field
+        }]);
         setNewCostume({
           id: null,
           fileUrl: "",
           costumename: "",
           description: "",
           cpid: "",
-  
+
         });
         setIsAddingNew(false);
 
       }
 
-     
+
     } else {
       alert('Please fill in at least the image URL and name fields');
     }

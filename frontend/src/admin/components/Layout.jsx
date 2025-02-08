@@ -45,7 +45,7 @@ const Layout = ({ children }) => {
         isSidebarOpen ? 'md:ml-64' : 'md:ml-16'
       }`}>
         <Navbar setIsSidebarOpen={setIsSidebarOpen} />
-        <main className="flex-1 p-4 mt-16">
+        <main className="flex-1 p-4 mt-2">
           {children}
         </main>
       </div>
