@@ -1,10 +1,7 @@
-
 const User = require('../models/User');
 const bcrypt = require('bcrypt');
-
 require('dotenv').config();
-
-exports.signup =  async (req, res) => {
+exports.signup = async (req, res) => {
     try {
         const data = req.body;
 
@@ -41,8 +38,6 @@ exports.signup =  async (req, res) => {
         res.json({ success: false, message: "Error occurred" });
     }
 }
-
-
 exports.login = async (req, res) => {
     const { username, password } = req.body;
     try {
@@ -60,13 +55,25 @@ exports.login = async (req, res) => {
             return res.json({ succes: false, message: "Username or password invalid" });
         }
         const token = isUsername.generateAuthToken();
-        res.cookie('token', token);
-
-        res.json({ succes: true, message: "user logged in" })
+        res.cookie('token',token);
+      
+        res.json({ succes: true, token: token })
 
 
     } catch (err) { console.log(err); return res.json({ succes: false, message: "error comes" }) }
 
 
+
+}
+exports.logOut = async (req, res) => {
+
+    try {
+        res.clearCookie('token')
+     
+        res.json({ success: true, message: "Logged out successfully" });
+
+    } catch (err) {
+        res.json({ success: false });
+    }
 
 }

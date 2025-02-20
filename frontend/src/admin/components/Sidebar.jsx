@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { 
   DoorClosed, 
@@ -9,21 +9,46 @@ import {
   Menu,
   Home,
   GalleryVertical,
-  
+  Plus,
+  LogOut,
+  User,
+  Key
 } from 'lucide-react';
 
 const Sidebar = ({ isOpen, setIsOpen }) => {
   const navigate = useNavigate();
   const location = useLocation();
+  const [showProfileMenu, setShowProfileMenu] = useState(false);
 
   const menuItems = [
     { title: 'Dashboard', icon: <Home size={20} />, path: '/admin/dashboard' },
     { title: 'Cupboards', icon: <DoorClosed size={20} />, path: '/admin/home' },
-    { title: 'All Costumes', icon: <Shirt size={20} />, path: '/admin/costumes' },
-    { title: 'Gallary', icon: <GalleryVertical size={20} />, path: '/admin/gallary' },
     { title: 'Users', icon: <Users size={20} />, path: '/admin/users' },
     { title: 'Add New User', icon: <UserPlus size={20} />, path: '/admin/users/new' },
-    { title: 'Add New Costume', icon: <Shirt size={20} />, path: '/admin/addNewCostume' },
+    { title: 'Add New Costume', icon: <Plus size={20} />, path: '/admin/addNewCostume' },
+    { title: 'Gallary', icon: <GalleryVertical size={20} />, path: '/admin/gallary' },
+  ];
+
+  const handleLogout = async() => {
+    try {
+      localStorage.removeItem('token')
+      navigate('/admin/');
+    } catch(err) {
+      console.log(err);
+    }
+  };
+
+  const profileOptions = [
+    { 
+      title: 'Your Profile', 
+      icon: <User size={16} />,
+      onClick: () => navigate('/admin/profile')
+    },
+    { 
+      title: 'Change Password', 
+      icon: <Key size={16} />,
+      onClick: () => navigate('/admin/change-password')
+    }
   ];
 
   return (
@@ -81,16 +106,51 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
         </nav>
 
         <div className="absolute bottom-0 left-0 right-0 p-4">
-          <div className={`flex items-center gap-4 ${!isOpen ? 'justify-center' : ''}`}>
-            <div className="w-8 h-8 rounded-full bg-gradient-to-r from-purple-400 to-pink-500 flex items-center justify-center">
-              <Users size={16} />
+          <div className={`flex flex-col gap-4 ${!isOpen ? 'items-center' : ''}`}>
+            <button
+              onClick={handleLogout}
+              className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-red-400 hover:bg-red-400/10 transition-colors"
+            >
+              <LogOut size={20} className={`${!isOpen ? 'mx-auto' : ''}`} />
+              {isOpen && <span className="text-sm font-medium">Logout</span>}
+            </button>
+            
+            <div className="relative">
+              <button
+                onClick={() => setShowProfileMenu(!showProfileMenu)}
+                className={`flex items-center gap-4 p-2 rounded-lg hover:bg-gray-800/50 transition-colors
+                  ${!isOpen ? 'justify-center' : ''}`}
+              >
+                <div className="w-8 h-8 rounded-full bg-gradient-to-r from-purple-400 to-pink-500 flex items-center justify-center">
+                  <Users size={16} />
+                </div>
+                {isOpen && (
+                  <div>
+                    <p className="text-sm font-medium">Admin User</p>
+                    <p className="text-xs text-gray-400">admin@example.com</p>
+                  </div>
+                )}
+              </button>
+
+              {/* Profile Popup Menu */}
+              {showProfileMenu && (
+                <div className="absolute bottom-full left-0 mb-2 w-48 bg-gray-800 rounded-lg shadow-lg py-2 border border-gray-700">
+                  {profileOptions.map((option, index) => (
+                    <button
+                      key={index}
+                      onClick={() => {
+                        option.onClick();
+                        setShowProfileMenu(false);
+                      }}
+                      className="w-full flex items-center gap-3 px-4 py-2 text-sm hover:bg-gray-700 transition-colors"
+                    >
+                      {option.icon}
+                      <span>{option.title}</span>
+                    </button>
+                  ))}
+                </div>
+              )}
             </div>
-            {isOpen && (
-              <div>
-                <p className="text-sm font-medium">Admin User</p>
-                <p className="text-xs text-gray-400">admin@example.com</p>
-              </div>
-            )}
           </div>
         </div>
       </aside>

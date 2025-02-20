@@ -5,13 +5,10 @@ const connectDb = require('../db/connectDb')
 connectDb();
 
 
-router.post('/addCupboard',cupboardControllers.addCupboard )
-router.get('/getCupboard',cupboardControllers.getCupboard )
-
-router.put('/updateCupboard',cupboardControllers.updateCupboard)
-
-
-
-router.delete('/deleteCupboard/:id',cupboardControllers.deleteCupboards)
+router.post('/addCupboard',cupboardControllers.addCupboard );
+router.get('/getCupboard',cupboardControllers.getCupboard );
+router.get('/getCupboardCount',cupboardControllers.getCupboardCount);
+router.put('/updateCupboard',cupboardControllers.updateCupboard);
+router.delete('/deleteCupboard/:id',cupboardControllers.deleteCupboards);
 
 module.exports = router;

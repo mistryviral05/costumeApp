@@ -1,12 +1,7 @@
 const Cupboard = require('../models/Cupboard');
 const Details = require('../models/Details');
-const path = require('path')
-const fs = require('fs')
-
-
-
-
-
+const path = require('path');
+const fs = require('fs');
 exports.addCupboard = async (req, res) => {
     try {
         const data = await req.body;
@@ -24,8 +19,6 @@ exports.addCupboard = async (req, res) => {
         res.status(500).json({ success: false, message: error.message });
     }
 }
-
-
 exports.getCupboard = async (req, res) => {
     try {
         const cupboards = await Cupboard.find();
@@ -35,8 +28,17 @@ exports.getCupboard = async (req, res) => {
         res.status(500).json({ success: false, message: error.message });
     }
 }
+exports.getCupboardCount = async(req,res)=>{
 
+    try{
+        const count = await Cupboard.countDocuments();
+        res.json({success:true,message:{count:count}})
 
+    }catch(err){
+        res.json({success:false,message:"error in controller"})
+    }
+
+}
 exports.updateCupboard =  async (req, res) => {
     const { name, id } = req.body;
 
@@ -62,8 +64,6 @@ exports.updateCupboard =  async (req, res) => {
 
 
 }
-
-
 exports.deleteCupboards =  async (req, res) => {
     try {
         const { id } = req.params;
@@ -71,9 +71,6 @@ exports.deleteCupboards =  async (req, res) => {
         for (const fileUrl of fileUrls) {
             const url = fileUrl.fileUrl
             const filePath = path.join(__dirname, '../', url.replace('http://localhost:3002/', ''));
-            console.log(fileUrl)
-            console.log(url)
-            console.log(filePath)
             if (fs.existsSync(filePath)) {
                 fs.unlink(filePath, (err) => {
                     console.log(err);
@@ -89,3 +86,4 @@ exports.deleteCupboards =  async (req, res) => {
 
     }
 }
+

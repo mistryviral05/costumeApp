@@ -1,35 +1,122 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import {
-  ImagePlus,
-  Tag,
-  Info,
-  DollarSign,
-  Calendar,
+
   Filter,
   Search,
-  Command,
   Star,
-  SlidersHorizontal,
-  ChevronDown,
-  Menu,
   Grid,
   List,
-  ShoppingCart,
-  Plus
+  Plus,
+  Delete,
+  DeleteIcon,
+  Edit, Trash2, ShoppingCart
 } from "lucide-react";
 import CatagoryModal from "../../components/CatagoryModal";
 import GallaryNavbar from "./GallaryNavbar";
+import { toast, ToastContainer,Bounce } from "react-toastify";
 
 const Gallery = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const [images, setImages] = useState([]);
+  const [searchQuery, setSearchQuery] = useState('');
   const [categories, setCategories] = useState(["All"]);
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [sortBy, setSortBy] = useState("featured");
   const [viewType, setViewType] = useState("grid");
   const [isMobileFiltersOpen, setIsMobileFiltersOpen] = useState(true);
   const [isOpen, setIsOpen] = useState(false)
+
+  const handleToAddCart = async(id)=>{
+    try{
+      const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/cpdetails/addToCart`,{
+        method:'POST',
+        headers:{
+          "Content-Type": "application/json",
+        },
+        body:JSON.stringify({id:id}),
+      })
+
+      if(res.ok){
+        const message = await res.json();
+        toast(`${message.message}`, {
+          position: "top-center",
+          autoClose: 1000,
+          hideProgressBar: false,
+          closeOnClick: false,
+          pauseOnHover: true,
+          draggable: true,
+          theme: "light",
+          transition: Bounce,
+        });
+        fetchData();
+      }
+
+
+    }catch(err){
+      console.log(err);
+    }
+
+
+ }
+
+
+  const handleSearch = async()=>{
+    try{
+
+      const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/cpdetails/searchCostume?query=${searchQuery}`)
+
+      if(res.ok){
+        const data = await res.json();
+        setImages(data.data)
+      }
+
+
+
+    }catch(err){
+      console.log(err)
+    }
+  }
+
+
+
+  const handleDelete = async (id) => {
+
+    let c = confirm("Are you sure you want to delete costume?");
+    if (c) {
+      const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/cpdetails/deleteCostume/${id}`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+      });
+
+      if (response.ok) {
+        const message = await response.json();
+        setImages((prevImages) => prevImages.filter(image => image.id !== id));
+        toast(`${message.message}`, {
+          position: "top-center",
+          autoClose: 1000,
+          hideProgressBar: false,
+          closeOnClick: false,
+          pauseOnHover: true,
+          draggable: true,
+          theme: "light",
+          transition: Bounce,
+        });
+
+      }
+    }
+
+
+
+
+
+  }
+
+
+
 
 
   const handleChangeOpen = () => {
@@ -47,6 +134,7 @@ const Gallery = () => {
 
       if (res.ok) {
         const data = await res.json();
+
         setImages(data.data);
       }
     } catch (err) {
@@ -83,7 +171,7 @@ const Gallery = () => {
 
   const filteredImages = selectedCategory === "All"
     ? images
-    : images.filter((image) => image.costumename === selectedCategory);
+    : images.filter((image) => image.catagory === selectedCategory);
 
   const sortedImages = [...filteredImages].sort((a, b) => {
     switch (sortBy) {
@@ -120,9 +208,7 @@ const Gallery = () => {
           <tr>
             <th className="px-4 py-3">Image</th>
             <th className="px-4 py-3">Name</th>
-            <th className="px-4 py-3">Rating</th>
             <th className="px-4 py-3">Description</th>
-            <th className="px-4 py-3">Price</th>
             <th className="px-4 py-3">Status</th>
           </tr>
         </thead>
@@ -148,29 +234,11 @@ const Gallery = () => {
                   </span>
                 )}
               </td>
-              <td className="px-4 py-3">
-                <div className="flex items-center gap-1">
-                  {[...Array(5)].map((_, i) => (
-                    <Star
-                      key={i}
-                      className={`w-3 h-3 ${i < (image.rating || 4) ? "text-yellow-400 fill-current" : "text-gray-300"
-                        }`}
-                    />
-                  ))}
-                  <span className="text-xs text-gray-500">({image.reviews || 42})</span>
-                </div>
-              </td>
+          
               <td className="px-4 py-3 text-gray-600 max-w-xs truncate">
                 {image.description}
               </td>
-              <td className="px-4 py-3">
-                <div className="flex items-center gap-1">
-                  <span className="font-bold text-gray-900">${image.price || "49.99"}</span>
-                  {image.discount && (
-                    <span className="text-xs text-green-600">-{image.discount}%</span>
-                  )}
-                </div>
-              </td>
+         
               <td className="px-4 py-3">
                 <span className={`px-2 py-1 rounded-full text-xs font-medium ${image.availability ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"
                   }`}>
@@ -189,8 +257,8 @@ const Gallery = () => {
       {sortedImages.map((image, index) => (
         <div
           key={index}
-          onClick={() => navigate("/admin/costumeDetails")}
-          className="bg-white rounded-xl shadow-sm overflow-hidden transform transition duration-300 hover:shadow-lg hover:scale-[1.02] cursor-pointer"
+          onClick={() => navigate(`/admin/costumeDetails/${image.id}`)}
+          className="rounded-xl shadow-sm overflow-hidden transform transition duration-300 hover:shadow-md hover:scale-[1.02] cursor-pointer border border-gray-200"
         >
           <div className="relative pb-[100%]">
             <img
@@ -200,66 +268,94 @@ const Gallery = () => {
               loading="lazy"
             />
             {image.isNew && (
-              <div className="absolute top-2 right-2 bg-gray-900 text-white px-2 py-1 rounded-full text-xs font-medium">
+              <div className="absolute top-2 right-2 bg-black text-white px-2 py-1 rounded-full text-xs font-medium">
                 New Arrival
               </div>
             )}
           </div>
-
+  
           <div className="p-3 sm:p-4">
+            {/* Costume Name */}
             <h3 className="text-base sm:text-lg font-medium text-gray-900 mb-1 line-clamp-1">
               {image.costumename}
             </h3>
-
-            <div className="flex items-center gap-1 mb-2">
-              {[...Array(5)].map((_, i) => (
-                <Star
-                  key={i}
-                  className={`w-3 h-3 sm:w-4 sm:h-4 ${i < (image.rating || 4) ? "text-yellow-400 fill-current" : "text-gray-300"
-                    }`}
-                />
-              ))}
-              <span className="text-xs sm:text-sm text-gray-500">({image.reviews || 42})</span>
-            </div>
-
-            <div className="flex items-center gap-2 text-xs sm:text-sm text-gray-600 mb-3">
-              <p className="line-clamp-2">{image.description}</p>
-            </div>
-
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-1">
-                <span className="text-base sm:text-lg font-bold text-gray-900">
-                  ${image.price || "49.99"}
-                </span>
-                {image.discount && (
-                  <span className="text-xs sm:text-sm text-green-600">-{image.discount}%</span>
-                )}
+  
+            {/* Display cpname */}
+            <p className="text-sm text-gray-500 mb-2 line-clamp-1">{image.cpname}</p>
+  
+            {/* Description */}
+            <p className="text-xs sm:text-sm text-gray-600 mb-3 line-clamp-2">{image.description}</p>
+  
+            {/* Quantity */}
+            <p className="text-sm font-medium text-gray-700 mb-3">Quantity: {image.quantity}</p>
+  
+            {/* Action Buttons */}
+            <div className="flex justify-between items-center gap-2 mt-3">
+              {/* Add to Cart Button */}
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleToAddCart(image.id);
+                }}
+                className="flex items-center gap-2 text-gray-700 hover:text-gray-900 transition text-sm"
+              >
+                <ShoppingCart size={18} />
+                Add to Cart
+              </button>
+  
+              <div className="flex items-center gap-2">
+                {/* Edit Button */}
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleEdit(image.id);
+                  }}
+                  className="p-2 rounded-lg hover:bg-gray-100 transition"
+                  title="Edit Costume"
+                >
+                  <Edit size={18} />
+                </button>
+  
+                {/* Delete Button */}
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleDelete(image.id);
+                  }}
+                  className="p-2 rounded-lg hover:bg-gray-100 transition"
+                  title="Delete Costume"
+                >
+                  <Trash2 size={18} className="text-red-500 hover:text-red-700" />
+                </button>
               </div>
-              <span className={`px-2 py-1 rounded-full text-xs font-medium ${image.availability ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"
-                }`}>
-                {image.availability ? "In Stock" : "Out of Stock"}
-              </span>
             </div>
-
-            {/* Add to Cart Button */}
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                console.log(`Added ${image.costumename} to cart`);
-              }}
-              className="mt-3 w-full bg-gray-900 text-white py-2 rounded-lg hover:bg-gray-800 transition text-sm"
-            >
-              Add to Cart
-            </button>
           </div>
         </div>
       ))}
     </div>
   );
+  
+  
 
 
   return (
     <>
+
+
+
+      <ToastContainer
+        position="top-center"
+        autoClose={5000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick={false}
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="dark"
+      />
+
       {isOpen && <CatagoryModal onClose={() => setIsOpen(false)} setCategories={setCategories} categories={categories} />}
 
       <div className="min-h-screen bg-gray-50">
@@ -267,7 +363,7 @@ const Gallery = () => {
         <GallaryNavbar toggalMobileFilter={() => setIsMobileFiltersOpen(!isMobileFiltersOpen)} />
 
         {/* Mobile Filters Drawer */}
-        {isMobileFiltersOpen && (
+        {!isMobileFiltersOpen && (
           <div className="fixed inset-0 bg-black bg-opacity-50 z-40 sm:hidden">
             <div className="absolute right-0 top-0 h-full w-64 bg-white p-4 shadow-lg">
               <div className="flex justify-between items-center mb-4">
@@ -286,8 +382,8 @@ const Gallery = () => {
 
                 ))}
                 <button
-
-                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors duration-200 w-full sm:w-autob bg-white text-gray-800 hover:bg-gray-100 border border-gray-200`}
+                   onClick={handleChangeOpen}
+                  className={`px-4 py-2 rounded-lg flex justify-center text-sm font-medium transition-colors duration-200 w-full sm:w-autob bg-white text-gray-800 hover:bg-gray-100 border border-gray-200`}
                 >
                   <Plus size={20} />
                 </button>
@@ -307,6 +403,13 @@ const Gallery = () => {
               <input
                 type="text"
                 placeholder="Search costumes..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    handleSearch(); // Trigger search on Enter key
+                  }
+                }}
                 className="block w-full pl-11 pr-16 py-3 border border-gray-300 rounded-lg
                        focus:ring-2 focus:ring-gray-900 focus:border-gray-900
                        bg-white text-gray-900 placeholder-gray-500

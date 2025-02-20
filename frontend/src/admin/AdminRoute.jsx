@@ -1,25 +1,34 @@
 import React, { useState } from 'react';
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
-import Home from './pages/Home';
-import Page from './pages/Page';
-import Qrcode from './pages/Qrcode';
-import Costumes from './pages/Costumes';
-import Scan from './pages/Scan';
+import Home from './pages/Home/Home';
+import Page from './pages/Page/Page';
+import Qrcode from './pages/QrCode/Qrcode';
+import Costumes from './pages/Costumes/Costumes';
+import Scan from './pages/Scan/Scan';
 import { v4 as uuidv4 } from 'uuid';
-import CreateCupboard from './pages/CreateCupboard';
-import Login from './pages/Login';
+import CreateCupboard from './pages/CreateCupboard/CreateCupboard';
+import Login from './pages/Login/Login';
 import Signup from './pages/Signup';
 import { ToastContainer, toast } from 'react-toastify';
 import Layout from './components/Layout';
-import Dashboard from './pages/Dashboard'
-import AllCostumes from './pages/AllCostumes';
-import Users from './pages/Users';
-import AddNewUser from './pages/AddNewUser';
+import Dashboard from './pages/Dashboard/Dashboard'
+import Users from './pages/Users/Users';
+import AddNewUser from './pages/AddNewUser/AddNewUser';
 import Gallary from './pages/Gallary/Gallary';
-import DetailsCostume from './pages/DetailsCostume';
-import AddNewCostume from './pages/AddNewCostume';
+import AddNewCostume from './pages/AddNewCostumes/AddNewCostume'
 import AuthProtected from './middleware/AuthProtected'
 import Cart from './pages/Gallary/Cart';
+import DetailsCostume from './pages/Gallary/DetailsCostume';
+import ClientLogin from '../client/pages/ClientLogin/ClientLogin';
+import HomePage from '../client/pages/homepage/homepage';
+import Navbar from '../client/components/Navbar/Navbar';
+import Gallery from '../client/pages/GallaryPage/GallaryPage';
+import ScanPage from '../client/pages/Scanner/Scan';
+import CartPage from '../client/pages/CartPage/CartPage';
+import DetailsCos from '../client/pages/Details/DetailsCos';
+import HolderCostumeDetails from './pages/Dashboard/HolderCostumes';
+import CostumeDetail from '../client/pages/CostumeDetail/CostumeDetail';
+import ClientAuthProtected from '../client/middleware/ClientAuthProtected';
 const AdminRoute = () => {
   const [cupboard, setCupboard] = useState([]);
   const [count, setCount] = useState(0);
@@ -128,11 +137,7 @@ const AdminRoute = () => {
       path: '/admin/dashboard',
       element: <> <AuthProtected> <Layout><Dashboard/></Layout></AuthProtected></>
     }
-    ,
-    {
-      path: '/admin/costumes',
-      element: <> <AuthProtected><Layout><AllCostumes/></Layout></AuthProtected></>
-    }
+   
     ,
     {
       path: '/admin/users',
@@ -150,7 +155,7 @@ const AdminRoute = () => {
     }
     ,
     {
-      path: '/admin/costumeDetails',
+      path: '/admin/costumeDetails/:id',
       element: <> <AuthProtected><DetailsCostume/></AuthProtected></>
     }
     ,
@@ -162,6 +167,46 @@ const AdminRoute = () => {
     {
       path: '/admin/Gallary/cart',
       element: <> <AuthProtected><Cart/></AuthProtected></>
+    }
+    ,
+    {
+      path: '/',
+      element: <><ClientLogin/></>
+    }
+    ,
+    {
+      path: '/admin/holderCostumeDetails/:id',
+      element: <><AuthProtected><HolderCostumeDetails/></AuthProtected></>
+    }
+    ,
+    {
+      path: '/client/homepage',
+      element: <><ClientAuthProtected><Navbar/><HomePage/></ClientAuthProtected></>
+    }
+    ,
+    {
+      path: '/client/Gallary',
+      element: <><ClientAuthProtected><Navbar/><Gallery/></ClientAuthProtected></>
+    }
+    ,
+    {
+      path: '/client/qr-scanner',
+      element: <><ClientAuthProtected><ScanPage/></ClientAuthProtected></>
+    }
+    ,
+    {
+      path: '/client/cartpage',
+      element: <><ClientAuthProtected><Navbar/><CartPage/></ClientAuthProtected></>
+    }
+    ,
+    {
+      path: '/client/Costumes/:id',
+      element: <><ClientAuthProtected><Navbar/><DetailsCos/></ClientAuthProtected></>
+    }
+    ,
+    {
+      path: '/client/CostumesDetail/:id',
+      element: <><ClientAuthProtected><CostumeDetail/></ClientAuthProtected></>
     }
   
   ]);

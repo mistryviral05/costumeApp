@@ -1,4 +1,6 @@
 import React, { useState } from 'react';
+import { ToastContainer, toast, Bounce } from 'react-toastify';
+
 
 const CategoryModal = ({ onClose,setCategories,categories }) => {
     const [catagory, setCatagory] = useState("")
@@ -19,7 +21,18 @@ const CategoryModal = ({ onClose,setCategories,categories }) => {
                     setCategories([...categories,catagory]);
                     onClose(false)
                     const message = await res.json();
-                    alert(message.message)
+                  toast(message.message, {
+                        position: "top-center",
+                        autoClose: 1000,
+                        hideProgressBar: false,
+                        closeOnClick: false,
+                        pauseOnHover: true,
+                        draggable: true,
+                        progress: undefined,
+                        theme: "light",
+                        transition: Bounce,
+                  
+                      });
                 }
 
             }catch(err){
@@ -34,6 +47,20 @@ const CategoryModal = ({ onClose,setCategories,categories }) => {
 
     return (
         <>
+              <ToastContainer
+                position="top-center"
+                autoClose={5000}
+                hideProgressBar={false}
+                newestOnTop={false}
+                closeOnClick={false}
+                rtl={false}
+                pauseOnFocusLoss
+                draggable
+                pauseOnHover
+                theme="dark"
+                transition={Bounce}
+        
+              />
             {/* Modal Overlay - Clicking outside will close modal */}
             <div 
                 className="fixed inset-0 z-50 grid h-screen w-screen place-items-center bg-black bg-opacity-60 backdrop-blur-sm transition-opacity duration-300"

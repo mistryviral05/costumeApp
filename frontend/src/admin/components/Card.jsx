@@ -28,7 +28,6 @@ const Card = ({ cupBoard, space, place, id, delteCupboard, setCupboards }) => {
             }
         }
     };
-    console.log(cupBoard)
     const handleRename = async () => {
         try {
             const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/cupboards/updateCupboard`, {
@@ -69,8 +68,6 @@ const Card = ({ cupBoard, space, place, id, delteCupboard, setCupboards }) => {
     return (
 
 
-
-        <tbody className='shadow-lg border border-collapse w-full    bg-white'>
             
             <tr className="hover:bg-gray-50 transition-all duration-200">
                 <td className="px-4 py-4 text-start">
@@ -83,7 +80,7 @@ const Card = ({ cupBoard, space, place, id, delteCupboard, setCupboards }) => {
                                 type="text"
                                 value={newCupBoardName}
                                 onChange={(e) => setNewCupBoardName(e.target.value)}
-                                className="border border-gray-300 p-2 rounded-lg w-full focus:ring focus:ring-blue-300"
+                                className="border border-gray-300 p-2 rounded-lg w-[100px] focus:ring focus:ring-blue-300"
                             />
                             <button
                                 onClick={handleRename}
@@ -128,7 +125,7 @@ const Card = ({ cupBoard, space, place, id, delteCupboard, setCupboards }) => {
                     </div>
                 </td>
             </tr>
-        </tbody>
+      
 
 
     );
