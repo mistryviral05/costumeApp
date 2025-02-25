@@ -1,20 +1,22 @@
 
 import React, { useState } from 'react'
 import 'react-toastify/dist/ReactToastify.css';
-import AdminRoute from './admin/AdminRoute';
+import { createBrowserRouter, RouterProvider } from 'react-router-dom';
+import clientRoutes from './client/ClientRoutes';
+import { getAdminRoutes } from './admin/AdminRoutes';
+import { Toaster } from 'sonner';
 
 
-
-
+const router = createBrowserRouter([...getAdminRoutes, ...clientRoutes]);
 
 
 function App() {
-  
+
 
   return (
-  
-    <AdminRoute/>
-    
+
+    <> <Toaster  position='top-center' /><RouterProvider router={router} /></>
+
   )
 }
 

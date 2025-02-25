@@ -477,23 +477,39 @@ exports.getAssignedDetailsById = async (req, res) => {
 
 exports.deleteHolderDetails = async(req,res)=>{
     try {
-
-        const {holderId}= req.body;
-        if(!holderId){
-            return res.json({message:"Id must be required"})
+        const { holderId } = req.body;
+        if (!holderId) {
+            return res.json({ message: "Id must be required" });
         }
-       const isDelete =  await AssignedTo.findByIdAndDelete(holderId);
-
-        if(!isDelete){
-            return res.json({message:"Data can not be deleted"})
+    
+        // Find the assigned holder before deleting
+        const assignedHolder = await AssignedTo.findById(holderId);
+        if (!assignedHolder) {
+            return res.json({ message: "Holder not found" });
         }
-
-        return res.json({success:true,message:"Holder Deleted"})
-
-
+    
+        // Restore costumes back to Details collection
+        for (const costume of assignedHolder.costumes) {
+            await Details.findOneAndUpdate(
+                { id: costume.id }, // Find the costume by ID
+                { $inc: { quantity: costume.quantity } }, // Increment the quantity
+                { new: true }
+            );
+        }
+    
+        // Delete the assigned holder
+        const isDelete = await AssignedTo.findByIdAndDelete(holderId);
+        if (!isDelete) {
+            return res.json({ message: "Data cannot be deleted" });
+        }
+    
+        return res.json({ success: true, message: "Holder Deleted and Costumes Restored" });
+    
     } catch (error) {
-        return res.json({success:false})
+        console.error("Error:", error);
+        return res.json({ success: false, error: error.message });
     }
+    
 }
 
 exports.updateHolderDetails = async(req,res)=>{

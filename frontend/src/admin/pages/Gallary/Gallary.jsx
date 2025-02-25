@@ -24,9 +24,19 @@ const Gallery = () => {
   const [categories, setCategories] = useState(["All"]);
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [sortBy, setSortBy] = useState("featured");
-  const [viewType, setViewType] = useState("grid");
   const [isMobileFiltersOpen, setIsMobileFiltersOpen] = useState(true);
   const [isOpen, setIsOpen] = useState(false)
+
+
+  const [viewType, setViewType] = useState(() => {
+    return localStorage.getItem('galleryViewType') || "grid";
+  });
+
+  // Update localStorage when view type changes
+  const handleViewTypeChange = (newViewType) => {
+    setViewType(newViewType);
+    localStorage.setItem('galleryViewType', newViewType);
+  };
 
   const handleToAddCart = async(id)=>{
     try{
@@ -208,16 +218,18 @@ const Gallery = () => {
           <tr>
             <th className="px-4 py-3">Image</th>
             <th className="px-4 py-3">Name</th>
+            <th className="px-4 py-3">CP Name</th>
             <th className="px-4 py-3">Description</th>
+            <th className="px-4 py-3">Quantity</th>
             <th className="px-4 py-3">Status</th>
+            <th className="px-4 py-3">Actions</th>
           </tr>
         </thead>
         <tbody>
           {sortedImages.map((image, index) => (
             <tr
               key={index}
-              onClick={() => navigate("/admin/costumeDetails")}
-              className="bg-white border-b hover:bg-gray-50 cursor-pointer"
+              className="bg-white border-b hover:bg-gray-50"
             >
               <td className="px-4 py-3">
                 <img
@@ -227,23 +239,62 @@ const Gallery = () => {
                 />
               </td>
               <td className="px-4 py-3 font-medium text-gray-900">
-                {image.costumename}
-                {image.isNew && (
-                  <span className="ml-2 bg-gray-900 text-white px-2 py-1 rounded-full text-xs">
-                    New
-                  </span>
-                )}
+                <div className="flex items-center gap-2">
+                  {image.costumename}
+                  {image.isNew && (
+                    <span className="bg-black text-white px-2 py-1 rounded-full text-xs">
+                      New Arrival
+                    </span>
+                  )}
+                </div>
               </td>
-          
+              <td className="px-4 py-3 text-gray-600">{image.cpname}</td>
               <td className="px-4 py-3 text-gray-600 max-w-xs truncate">
                 {image.description}
               </td>
-         
+              <td className="px-4 py-3 text-gray-600">
+                {image.quantity}
+              </td>
               <td className="px-4 py-3">
-                <span className={`px-2 py-1 rounded-full text-xs font-medium ${image.availability ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"
-                  }`}>
+                <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                  image.availability ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"
+                }`}>
                   {image.availability ? "In Stock" : "Out of Stock"}
                 </span>
+              </td>
+              <td className="px-4 py-3">
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleToAddCart(image.id);
+                    }}
+                    className="p-2 rounded-lg hover:bg-gray-100 transition"
+                    title="Add to Cart"
+                  >
+                    <ShoppingCart size={18} />
+                  </button>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      // navigate(`/admin/costumeDetails/${image.id}`);
+                    }}
+                    className="p-2 rounded-lg hover:bg-gray-100 transition"
+                    title="View Details"
+                  >
+                    <Edit size={18} />
+                  </button>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleDelete(image.id);
+                    }}
+                    className="p-2 rounded-lg hover:bg-gray-100 transition"
+                    title="Delete Costume"
+                  >
+                    <Trash2 size={18} className="text-red-500 hover:text-red-700" />
+                  </button>
+                </div>
               </td>
             </tr>
           ))}
@@ -308,7 +359,7 @@ const Gallery = () => {
                 <button
                   onClick={(e) => {
                     e.stopPropagation();
-                    handleEdit(image.id);
+                    // handleEdit(image.id);
                   }}
                   className="p-2 rounded-lg hover:bg-gray-100 transition"
                   title="Edit Costume"
@@ -451,8 +502,9 @@ const Gallery = () => {
                   <option value="newest">Newest Arrivals</option>
                 </select>
 
+           
                 <button
-                  onClick={() => setViewType(viewType === "grid" ? "table" : "grid")}
+                  onClick={() => handleViewTypeChange(viewType === "grid" ? "table" : "grid")}
                   className="p-2 rounded-lg border border-gray-200 bg-white hover:bg-gray-50 flex items-center gap-2"
                 >
                   {viewType === "grid" ? (

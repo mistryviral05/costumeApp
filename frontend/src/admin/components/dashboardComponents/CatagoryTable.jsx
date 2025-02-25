@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { Edit, Trash2, Check, X } from 'lucide-react'; // Adding Check and X icons for save
 
-import { ToastContainer, toast, Bounce } from 'react-toastify';
+import { toast } from "sonner";
+import { ToastContainer, Bounce } from 'react-toastify';
 
 const CatagoryTable = () => {
   const [categories, setCategories] = useState([]);
@@ -34,18 +35,7 @@ const CatagoryTable = () => {
         const message = await res.json();
         // setCategories((prvc)=>prvc.filter((c)=>c._id!==id))
         fetchData();//for new data fetch
-        toast(message.message, {
-          position: "top-center",
-          autoClose: 1000,
-          hideProgressBar: false,
-          closeOnClick: false,
-          pauseOnHover: true,
-          draggable: true,
-          progress: undefined,
-          theme: "light",
-          transition: Bounce,
-
-        });
+        toast.success(message.message);
       }
     } catch (err) {
       console.log(err)

@@ -12,7 +12,8 @@ import {
   Plus,
   LogOut,
   User,
-  Key
+  Key,
+  WashingMachine
 } from 'lucide-react';
 
 const Sidebar = ({ isOpen, setIsOpen }) => {
@@ -26,6 +27,7 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
     { title: 'Users', icon: <Users size={20} />, path: '/admin/users' },
     { title: 'Add New User', icon: <UserPlus size={20} />, path: '/admin/users/new' },
     { title: 'Add New Costume', icon: <Plus size={20} />, path: '/admin/addNewCostume' },
+    { title: 'Washing', icon: <WashingMachine size={20} />, path: '/admin/wash' },
     { title: 'Gallary', icon: <GalleryVertical size={20} />, path: '/admin/gallary' },
   ];
 

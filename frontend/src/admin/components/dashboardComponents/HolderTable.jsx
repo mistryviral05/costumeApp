@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Check, X, Edit, Trash2, Loader2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { toast } from "sonner";
 
 const HolderTable = () => {
   const [holders, setHolders] = useState([]);
@@ -16,7 +17,6 @@ const HolderTable = () => {
 
       if (res.ok) {
         const data = await res.json();
-        console.log(data.data);
         setHolders(data.data);
       }
     } catch (error) {
@@ -41,9 +41,32 @@ const HolderTable = () => {
     setNewHolderData(holder);
   };
 
-  const handleSave = (id) => {
-    setHolders((prev) => prev.map((holder) => (holder.id === id ? newHolderData : holder)));
-    setEditHolderId(null);
+  const handleSave = async(id) => {
+    // setHolders((prev) => prev.map((holder) => (holder.id === id ? newHolderData : holder)));
+    // setEditHolderId(null);
+    try {
+        const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/cpdetails/updateHolderDetails`,{
+          method:"PUT",
+          headers:{
+            'Content-Type':'application/json'
+          },
+          body:JSON.stringify({holderId:id,phonenumber:newHolderData.contact,deadline:newHolderData.deadline})
+        })
+
+        if(res.ok){
+          const message = await res.json();
+           toast.success(message.message)
+          fetchData()
+          setEditHolderId(null);
+        }
+    } catch (error) {
+      console.log(error)
+    }
+
+
+
+
+
   };
 
   const handleCancel = () => {
@@ -63,7 +86,7 @@ const HolderTable = () => {
         });
         if(res.ok){
           const message = await res.json();
-          alert(message.message);//here write react tostify
+         toast.success(message.message)
           setHolders((prev) => prev.filter((holder) => holder.id !== id));
         }
   

@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { NavLink, useLocation, useNavigate } from "react-router-dom";
-import { Menu, X, Shirt, Image, QrCode, ShoppingCart, LogOut } from "lucide-react";
+import { Menu, X, Shirt, Image, QrCode, ShoppingCart, LogOut, User } from "lucide-react";
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -13,13 +13,12 @@ const Navbar = () => {
   };
 
   const handleLogout = () => {
-     let logout = false;
+    let logout = false;
     if(localStorage.getItem('clientToken')){
       localStorage.removeItem('clientToken');
       logout = true;
     }
     if(logout == true){
-
       navigate('/');
     }
   };
@@ -52,6 +51,7 @@ const Navbar = () => {
                 <span>{item.title}</span>
               </NavLink>
             ))}
+            
             <button
               onClick={handleLogout}
               className="flex items-center space-x-2 px-4 py-2 rounded-md bg-purple-700 hover:bg-purple-600 transition-colors duration-200"
@@ -59,10 +59,18 @@ const Navbar = () => {
               <LogOut className="w-5 h-5" />
               <span>Logout</span>
             </button>
+
+            {/* Avatar moved to end */}
+            <div 
+              className="w-8 h-8 rounded-full bg-purple-700 flex items-center justify-center cursor-pointer hover:bg-purple-600 transition-colors duration-200"
+              onClick={() => navigate('/client/profile')} // Add your profile route here
+            >
+              <User className="w-5 h-5" />
+            </div>
           </div>
 
           {/* Mobile Menu Button */}
-          <div className="md:hidden">
+          <div className="md:hidden flex items-center space-x-4">
             <button
               onClick={toggleMenu}
               className="inline-flex items-center justify-center p-2 rounded-md hover:bg-purple-800 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-white"
@@ -96,6 +104,17 @@ const Navbar = () => {
               <LogOut className="w-5 h-5" />
               <span>Logout</span>
             </button>
+            
+            {/* Avatar in mobile menu */}
+            <div 
+              className="flex items-center space-x-2 w-full px-3 py-2 rounded-md hover:bg-purple-800 transition-colors duration-200 cursor-pointer"
+              onClick={() => navigate('/client/profile')} // Add your profile route here
+            >
+              <div className="w-8 h-8 rounded-full bg-purple-700 flex items-center justify-center">
+                <User className="w-5 h-5" />
+              </div>
+              <span>Profile</span>
+            </div>
           </div>
         </div>
       )}

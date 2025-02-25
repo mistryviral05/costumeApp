@@ -7,9 +7,10 @@ import { NavLink } from 'react-router-dom';
 
 const CARDS_PER_PAGE = 12;
 
-const Home = ({ cupBoard, setCupboards }) => {
+const Home = () => {
+  const [cupboards, setCupboards] = useState([]);
   const [displayCount, setDisplayCount] = useState(CARDS_PER_PAGE);
-  const navigate = useLocation();
+  const location = useLocation();
 
   const fetchCupboards = async () => {
     try {
@@ -36,14 +37,13 @@ const Home = ({ cupBoard, setCupboards }) => {
       closeOnClick: false,
       pauseOnHover: true,
       draggable: true,
-      progress: undefined,
       theme: "light",
       transition: Bounce,
     });
   };
 
   const showMore = () => {
-    setDisplayCount(prevCount => Math.min(prevCount + CARDS_PER_PAGE, cupBoard.length));
+    setDisplayCount((prevCount) => Math.min(prevCount + CARDS_PER_PAGE, cupboards.length));
   };
 
   return (
@@ -52,9 +52,7 @@ const Home = ({ cupBoard, setCupboards }) => {
         position="top-right"
         autoClose={5000}
         hideProgressBar={false}
-        newestOnTop={false}
         closeOnClick={false}
-        rtl={false}
         pauseOnFocusLoss
         draggable
         pauseOnHover
@@ -64,11 +62,7 @@ const Home = ({ cupBoard, setCupboards }) => {
       <div className="p-2 sm:p-4 h-[calc(100vh-5rem)] overflow-y-auto">
         {/* Search Form */}
         <div className="max-w-md mx-auto mb-4">
-          <label htmlFor="default-search" className="mb-2 text-sm font-medium text-gray-900 sr-only">Search</label>
           <div className="relative">
-            <div className="absolute inset-y-0 start-0 flex items-center ps-3 pointer-events-none">
-         
-            </div>
             <input 
               type="search" 
               id="default-search" 
@@ -98,11 +92,7 @@ const Home = ({ cupBoard, setCupboards }) => {
                   stroke="currentColor"
                   strokeWidth={2}
                 >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M12 4.5v15m7.5-7.5h-15"
-                  />
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
                 </svg>
                 Create a Cupboard
               </button>
@@ -111,7 +101,7 @@ const Home = ({ cupBoard, setCupboards }) => {
         )}
 
         {/* Cupboards Table/List */}
-        {cupBoard.length > 0 ? (
+        {cupboards.length > 0 ? (
           <>
             <div className="overflow-x-auto">
               <div className="inline-block min-w-full align-middle">
@@ -119,16 +109,16 @@ const Home = ({ cupBoard, setCupboards }) => {
                   <table className="min-w-full divide-y divide-gray-200">
                     <thead className="bg-gray-50">
                       <tr>
-                        <th scope="col" className="px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Icon</th>
-                        <th scope="col" className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
-                        <th scope="col" className="px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider  table-cell">Space</th>
-                        <th scope="col" className="px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider  table-cell">Place</th>
-                        <th scope="col" className="px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider  table-cell">Costumes</th>
-                        <th scope="col" className="px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                        <th className="px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Icon</th>
+                        <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
+                        <th className="px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider table-cell">Space</th>
+                        <th className="px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider table-cell">Place</th>
+                        <th className="px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider table-cell">Costumes</th>
+                        <th className="px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
                       </tr>
                     </thead>
                     <tbody className="bg-white divide-y divide-gray-200">
-                      {cupBoard.slice(0, displayCount).map((f, index) => (
+                      {cupboards.slice(0, displayCount).map((f, index) => (
                         <Card 
                           key={index} 
                           cupBoard={f.name} 
@@ -146,7 +136,7 @@ const Home = ({ cupBoard, setCupboards }) => {
             </div>
 
             {/* Show More Button */}
-            {displayCount < cupBoard.length && (
+            {displayCount < cupboards.length && (
               <div className="mt-4 flex justify-center">
                 <button
                   onClick={showMore}

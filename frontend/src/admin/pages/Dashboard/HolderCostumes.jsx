@@ -19,22 +19,22 @@ const HolderCostumeDetails = () => {
   const getButtonStyle = (costumeId, condition) => {
     const isSelected = returnStatus[costumeId] === condition;
     
-    const baseStyles = "w-full px-4 py-2 text-white rounded-lg text-sm font-medium transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2";
+    const baseStyles = "px-3 py-1 text-white rounded text-sm font-medium transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2";
     
     const conditionStyles = {
       good: `${baseStyles} ${
         isSelected 
-          ? "bg-green-700 ring-2 ring-green-500 ring-offset-2 transform scale-95" 
+          ? "bg-green-700 ring-2 ring-green-500 ring-offset-2" 
           : "bg-green-600 hover:bg-green-700 focus:ring-green-500"
       }`,
       medium: `${baseStyles} ${
         isSelected 
-          ? "bg-yellow-700 ring-2 ring-yellow-500 ring-offset-2 transform scale-95" 
+          ? "bg-yellow-700 ring-2 ring-yellow-500 ring-offset-2" 
           : "bg-yellow-600 hover:bg-yellow-700 focus:ring-yellow-500"
       }`,
       damaged: `${baseStyles} ${
         isSelected 
-          ? "bg-red-700 ring-2 ring-red-500 ring-offset-2 transform scale-95" 
+          ? "bg-red-700 ring-2 ring-red-500 ring-offset-2" 
           : "bg-red-600 hover:bg-red-700 focus:ring-red-500"
       }`
     };
@@ -137,80 +137,94 @@ const HolderCostumeDetails = () => {
           </div>
         </div>
 
-        {/* Costumes Grid */}
-        <div>
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="text-xl font-bold text-gray-900">Rented Costumes</h2>
-            <div className="flex items-center gap-2">
-              <Package className="h-5 w-5 text-black" />
-              <span className="text-sm font-medium text-gray-600">
-                {costumes.length} {costumes.length === 1 ? 'Item' : 'Items'}
-              </span>
+        {/* Costumes Table */}
+        <div className="bg-white rounded-xl shadow-md border border-gray-200 overflow-hidden">
+          <div className="px-6 py-4 border-b border-gray-200">
+            <div className="flex items-center justify-between">
+              <h2 className="text-xl font-bold text-gray-900">Rented Costumes</h2>
+              <div className="flex items-center gap-2">
+                <Package className="h-5 w-5 text-black" />
+                <span className="text-sm font-medium text-gray-600">
+                  {costumes.length} {costumes.length === 1 ? 'Item' : 'Items'}
+                </span>
+              </div>
             </div>
           </div>
           
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {costumes.map((costume, idx) => (
-              <div 
-                key={idx}
-                className="bg-white rounded-xl shadow-md border border-gray-200 overflow-hidden hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1"
-              >
-                <div className="h-48 w-full relative">
-                  <img 
-                    src={costume.fileUrl}
-                    alt={costume.costumename}
-                    className="w-full h-full object-cover"
-                  />
-                  <div className="absolute top-3 right-3">
-                    <span className={`px-3 py-1 rounded-full text-xs font-medium ${
-                      costume.status === 'Active' 
-                        ? 'bg-green-100 text-green-800' 
-                        : 'bg-gray-100 text-gray-800'
-                    }`}>
-                      {costume.status} Active
-                    </span>
-                  </div>
-                </div>
-                <div className="p-4">
-                  <h3 className="text-lg font-semibold text-gray-900 mb-2">{costume.costumename}</h3>
-                  <div className="flex items-center gap-2 mb-4">
-                    <div className="px-3 py-1 bg-gray-100 text-gray-800 rounded-full text-sm font-medium">
-                      Quantity: {costume.quantity}
-                    </div>
-                    {returnStatus[costume.id] && (
-                      <div className={`px-3 py-1 rounded-full text-sm font-medium ${
-                        returnStatus[costume.id] === 'good' ? 'bg-green-100 text-green-800' :
-                        returnStatus[costume.id] === 'medium' ? 'bg-yellow-100 text-yellow-800' :
-                        'bg-red-100 text-red-800'
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead>
+                <tr className="bg-gray-50">
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Image</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Costume Name</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Quantity</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Return Status</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-200">
+                {costumes.map((costume, idx) => (
+                  <tr key={idx} className="hover:bg-gray-50">
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <img 
+                        src={costume.fileUrl}
+                        alt={costume.costumename}
+                        className="h-16 w-16 object-cover rounded"
+                      />
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="text-sm font-medium text-gray-900">{costume.costumename}</div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="text-sm text-gray-900">{costume.quantity}</div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <span className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                        costume.status === 'Active' 
+                          ? 'bg-green-100 text-green-800' 
+                          : 'bg-gray-100 text-gray-800'
                       }`}>
-                        {returnStatus[costume.id].charAt(0).toUpperCase() + returnStatus[costume.id].slice(1)}
+                        {costume.status}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      {returnStatus[costume.id] && (
+                        <span className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                          returnStatus[costume.id] === 'good' ? 'bg-green-100 text-green-800' :
+                          returnStatus[costume.id] === 'medium' ? 'bg-yellow-100 text-yellow-800' :
+                          'bg-red-100 text-red-800'
+                        }`}>
+                          {returnStatus[costume.id].charAt(0).toUpperCase() + returnStatus[costume.id].slice(1)}
+                        </span>
+                      )}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="flex space-x-2">
+                        <button 
+                          onClick={() => handleReturn(costume.id, 'good')}
+                          className={getButtonStyle(costume.id, 'good')}
+                        >
+                          Good
+                        </button>
+                        <button 
+                          onClick={() => handleReturn(costume.id, 'medium')}
+                          className={getButtonStyle(costume.id, 'medium')}
+                        >
+                          Medium
+                        </button>
+                        <button 
+                          onClick={() => handleReturn(costume.id, 'damaged')}
+                          className={getButtonStyle(costume.id, 'damaged')}
+                        >
+                          Damaged
+                        </button>
                       </div>
-                    )}
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <button 
-                      onClick={() => handleReturn(costume.id, 'good')}
-                      className={getButtonStyle(costume.id, 'good')}
-                    >
-                      Return (Good)
-                    </button>
-                    <button 
-                      onClick={() => handleReturn(costume.id, 'medium')}
-                      className={getButtonStyle(costume.id, 'medium')}
-                    >
-                      Return (Medium)
-                    </button>
-                    <button 
-                      onClick={() => handleReturn(costume.id, 'damaged')}
-                      className={getButtonStyle(costume.id, 'damaged')}
-                    >
-                      Return (Damaged)
-                    </button>
-                  </div>
-                </div>
-              </div>
-            ))}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
         </div>
       </div>
