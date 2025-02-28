@@ -4,26 +4,6 @@ import Form from '../../../admin/components/cart/Form';
 import Item from '../../../admin/components/cart/Item'
 
 
-// Mock data - replace with actual cart data in your implementation
-const mockCartItems = [
-    {
-        id: 1,
-        name: "Traditional Wedding Costume",
-        size: "M",
-        price: 89.99,
-        quantity: 1,
-        image: "https://images.unsplash.com/photo-1594387972779-8d9871e5e178?w=800&auto=format&fit=crop&q=60"
-    },
-    {
-        id: 2,
-        name: "Modern Festival Attire",
-        size: "L",
-        price: 65.50,
-        quantity: 2,
-        image: "https://images.unsplash.com/photo-1617627143750-d86bc21e42bb?w=800&auto=format&fit=crop&q=60"
-    }
-];
-
 const CartPage = () => {
     const [cartId, setCartId] = useState(null)
 

@@ -1,10 +1,35 @@
-import React, { useEffect, useState } from 'react'
+import React, { useContext, useEffect, useState } from 'react'
 import CupboardsTable from '../../components/cupboardTable/CupboardTable'
+import { SocketContext } from '@/Context/SocketContext'
 
 const HomePage = () => {
   const [cupboards, setCupboards] = useState([])
   const [loading,setLoading]= useState(false)
+  const {socket}= useContext(SocketContext)
 
+  useEffect(() => {
+   const handleFetch = (data)=>{
+        setCupboards((prev)=>[...prev,data.newCupboard])
+   }
+   const handleDeleteCupboard = (data)=>{
+        setCupboards((prev)=>prev.filter((cupboard)=>cupboard.id!==data.id))
+   }
+
+   const handleUpdate = (data)=>{
+    setCupboards((prev)=>prev.map((e)=>e.id === data.id ?{...e,name:data.name}:e))
+   }
+
+   socket.on("addNewCupboard",handleFetch)
+   socket.on("deleteCupboard",handleDeleteCupboard)
+   socket.on("updateCupboard",handleUpdate)
+   
+   return () => {
+     socket.off("addNewCupboard",handleFetch)
+     socket.off("deleteCupboard",handleDeleteCupboard)
+     socket.off("updateCupboard",handleUpdate)
+    }
+  }, [socket])
+  
 
 
 

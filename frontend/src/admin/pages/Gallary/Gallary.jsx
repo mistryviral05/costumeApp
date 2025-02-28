@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import {
 
@@ -15,6 +15,7 @@ import {
 import CatagoryModal from "../../components/CatagoryModal";
 import GallaryNavbar from "./GallaryNavbar";
 import { toast, ToastContainer,Bounce } from "react-toastify";
+import { SocketContext } from "@/Context/SocketContext";
 
 const Gallery = () => {
   const navigate = useNavigate();
@@ -27,6 +28,34 @@ const Gallery = () => {
   const [isMobileFiltersOpen, setIsMobileFiltersOpen] = useState(true);
   const [isOpen, setIsOpen] = useState(false)
 
+  const {socket}= useContext(SocketContext)
+
+  useEffect(() => {
+
+    const handleDel = async(data)=>{
+      setImages((prevImages) => prevImages.filter(image => image.id !== data.message));
+    }
+
+    const handleUpdateQuantity  =  (data)=>{
+      setImages((prevCostumes)=>prevCostumes.map((e)=>e.id===data.id?{...e,quantity:data.newQuantity}:e))
+  }
+
+  const fetchRealTimeData = (data)=>{
+    setImages((prevImages)=>[...prevImages,data.newDetails])
+
+  }
+
+    socket.on("deleteGallary",handleDel)
+    socket.on("updateCostumeQuantity",handleUpdateQuantity)
+    socket.on("addNewCostumes",fetchRealTimeData)
+    return () => {
+      socket.off("deleteGallary",handleDel)
+      socket.off("updateCostumeQuantity",handleUpdateQuantity)
+      socket.off("addNewCostumes",fetchRealTimeData)
+      
+    }
+  }, [socket])
+  
 
   const [viewType, setViewType] = useState(() => {
     return localStorage.getItem('galleryViewType') || "grid";
@@ -60,7 +89,6 @@ const Gallery = () => {
           theme: "light",
           transition: Bounce,
         });
-        fetchData();
       }
 
 
@@ -104,7 +132,7 @@ const Gallery = () => {
 
       if (response.ok) {
         const message = await response.json();
-        setImages((prevImages) => prevImages.filter(image => image.id !== id));
+        // setImages((prevImages) => prevImages.filter(image => image.id !== id));
         toast(`${message.message}`, {
           position: "top-center",
           autoClose: 1000,

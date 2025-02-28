@@ -1,11 +1,69 @@
 import { DeleteIcon, ShoppingCart, Plus, Minus } from "lucide-react";
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { toast, ToastContainer, Bounce } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { SocketContext } from "@/Context/SocketContext";
 
 const Cart = ({ setCartId }) => {
   const [costumes, setCostumes] = useState([]);
- 
+  const {socket}= useContext(SocketContext);
+  
+
+  useEffect(() => {
+      const handleCartDetails = async(data)=>{
+        setCartId(data.cartId);
+        setCostumes(
+          Array.isArray(data.message) ? data.message.map(item => ({ ...item, quantity: item.quantity || 1 })) : []
+        );
+      }
+
+
+      const handleRemoveFromCart = async(data)=>{
+        setCostumes((prevCos) => prevCos.filter(cos => cos.id !== data.message));
+      }
+
+      const handleRemoveAll = (data)=>{
+          if(data.success){
+            setCostumes([])
+          }
+      }
+
+      const handleIncrement = (data)=>{
+
+      
+        setCostumes((prevCostumes) =>
+          prevCostumes.map((item) =>
+            item.id === data.id ? { ...item, quantity: data.quantity } : item
+          )
+        );
+      }
+      const handleDecrement = (data)=>{
+
+      
+        setCostumes((prevCostumes) =>
+          prevCostumes.map((item) =>
+            item.id === data.id ? { ...item, quantity: data.quantity } : item
+          )
+        );
+      }
+
+
+    socket.on("CartDetails",handleCartDetails)
+    socket.on("removeToCart",handleRemoveFromCart)
+    socket.on("GiveOther",handleRemoveAll)
+    socket.on("incrementQuantity",handleIncrement)
+    socket.on("decrementQuantity",handleDecrement)
+    
+    
+    return () => {
+      socket.off("CartDetails",handleCartDetails)
+      socket.off("removeToCart",handleRemoveFromCart)
+      socket.off("GiveOther",handleRemoveAll)
+      socket.off("incrementQuantity",handleIncrement)
+      socket.off("decrementQuantity",handleIncrement)
+    }
+  }, [socket])
+  
 
   const fetchData = async () => {
     try {
@@ -16,7 +74,6 @@ const Cart = ({ setCartId }) => {
 
       if (res.ok) {
         const data = await res.json();
-        console.log(data)
         setCartId(data.cartId);
         setCostumes(
           Array.isArray(data.message) ? data.message.map(item => ({ ...item, quantity: item.quantity || 1 })) : []
@@ -47,7 +104,7 @@ const Cart = ({ setCartId }) => {
         if (res.ok) {
           const message = await res.json();
           toast.success(message.message, { position: "top-center", autoClose: 1000, transition: Bounce });
-          fetchData();
+          // fetchData();
         }
       } catch (err) {
         console.log(err);
@@ -104,11 +161,7 @@ const Cart = ({ setCartId }) => {
       if (res.ok) {
         const message = await res.json();
         toast.success(message.message, { position: "top-center", autoClose: 1000, transition: Bounce });
-          setCostumes((prevCostumes) =>
-            prevCostumes.map((item) =>
-              item.id === id ? { ...item, quantity: newQuantity } : item
-            )
-          );
+        
       }
     } catch (err) {
       console.log(err);

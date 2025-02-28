@@ -5,6 +5,7 @@ const path = require('path')
 const fs = require('fs');
 const Cart = require('../models/Cart');
 const AssignedTo = require('../models/AssignedTo');
+const { getIO } = require('../socket');
 
 exports.addCostume = async (req, res) => {
     try {
@@ -30,6 +31,7 @@ exports.addCostume = async (req, res) => {
             quantity:data.quantity,
         });
         await newDetails.save();
+        getIO().emit("addNewCostumes",{success:true,newDetails})
         res.json({ success: true, message: "Costume Added" })
     } catch (err) {
         console.log(err);
@@ -50,6 +52,8 @@ exports.deleteCostumeById = async (req, res) => {
                     console.log(err);
                 })
             }
+
+            getIO().emit("deleteGallary",{success:true,message:id})
             res.json({ success: true, message: "Data Deleted" })
         } else {
             res.json({ success: false })
@@ -187,8 +191,8 @@ exports.searchCostume = async (req, res) => {
 
 }
 exports.addToCart = async (req, res) => {
-
     const { id } = req.body;
+    
 
     try {
         const costume = await Details.findOne({ id: id });
@@ -198,46 +202,48 @@ exports.addToCart = async (req, res) => {
         if (costume.quantity <= 0) {
             return res.json({ message: "Costume is out of stock" });
         }
-    
-    
+
         let cart = await Cart.findOne();
-        // let assignedTo = await AssignedTo.find();
-    
+
         if (!cart) {
             cart = new Cart({ costumes: [] });
         }
-    
-        // Check if the costume is already in the cart
-        const existingItemIndex = cart.costumes.findIndex((item) => item.id === id);
-    
-        // Check if the costume is already assigned to another person
-        // const alreadyGivenPerson = assignedTo.some((person) =>
-        //     person.costumes.some((prv) => prv.id === id)
-        // );
-    
-        // if (alreadyGivenPerson) {
-        //     return res.json({ message: "This costume is given to another person" });
-        // }
-    
-        if (existingItemIndex !== -1) {
-            // If item exists in cart, increase quantity
-            cart.costumes[existingItemIndex].quantity += 1;
 
+        const existingItemIndex = cart.costumes.findIndex((item) => item.id === id);
+
+        if (existingItemIndex !== -1) {
+            cart.costumes[existingItemIndex].quantity += 1;
         } else {
-            // If item does not exist, add it with quantity: 1
             cart.costumes.push({ id: id, quantity: 1 });
         }
         costume.quantity -= 1;
         await costume.save();
         await cart.save();
+
+        // Fetch updated cart details
+        const cartId = cart._id;
+        const costumeIds = cart.costumes.map(item => item.id);
+        const costumeDetails = await Details.find({ id: { $in: costumeIds } });
+
+        const mergedCart = costumeDetails.map(costume => {
+            const cartItem = cart.costumes.find(item => item.id === costume.id);
+            return {
+                ...costume.toObject(),
+                quantity: cartItem ? cartItem.quantity : 1
+            };
+        });
+
+        // Emit updated cart details via Socket.IO
+        getIO().emit("CartDetails", { success: true, cartId: cartId, message: mergedCart });
+        getIO().emit("updateCostumeQuantity", { id: costume.id, newQuantity: costume.quantity });
         res.json({ success: true, message: "Costume added to cart" });
-    
+
     } catch (err) {
         console.log(err);
         res.json({ success: false });
     }
-    
-}
+};
+
 exports.removeToCart = async (req, res) => {
     try {
         const { id } = req.body;
@@ -270,7 +276,7 @@ exports.removeToCart = async (req, res) => {
         
         // Save the updated cart
         await cart.save();
-        
+        getIO().emit("removeToCart",{success:true,message:id})
         res.json({ success: true, message: "Costume removed from cart and quantity updated" });
         
 
@@ -304,6 +310,7 @@ exports.getCartDetails = async (req, res) => {
                 quantity: cartItem ? cartItem.quantity : 1 // Assign quantity from cart
             };
         });
+        
         
         res.json({ success: true, cartId: cartId, message: mergedCart });
         
@@ -349,7 +356,7 @@ exports.assignTo = async (req, res) => {
         await assignedCart.save();
 
         await Cart.findByIdAndDelete(cartId);
-
+        getIO().emit("GiveOther",{success:true});
         res.json({ success: true, message: "Costumes assigned with deadline" })
 
 
@@ -406,6 +413,7 @@ exports.incrementQuantity = async(req,res)=>{
         costume.quantity -= 1;
         await costume.save();
         await cart.save();
+        getIO().emit("incrementQuantity",{id,quantity})
         res.status(200).json({ success: true, message: "Quantity increment"});
 
     
@@ -444,6 +452,7 @@ exports.decrementQuantity = async(req,res)=>{
         costume.quantity += 1;
         await costume.save();
         await cart.save();
+        getIO().emit("decrementQuantity",{id,quantity})
         res.status(200).json({ success: true, message: "Quantity decremented"});
         
     } catch (error) {

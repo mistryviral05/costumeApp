@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, {  useState } from 'react';
 import { Edit, Trash, ArrowRight, QrCode } from 'lucide-react';
 import { NavLink } from 'react-router-dom';
 
@@ -7,6 +7,11 @@ import { ToastContainer, toast, Bounce } from 'react-toastify';
 const Card = ({ cupBoard, space, place, id, delteCupboard, setCupboards }) => {
     const [isRenaming, setIsRenaming] = useState(false);
     const [newCupBoardName, setNewCupBoardName] = useState(cupBoard.name);
+
+
+
+   
+    
 
     const handleDelete = async () => {
         const a = confirm("Are you want to delete this cupboard")
@@ -39,12 +44,12 @@ const Card = ({ cupBoard, space, place, id, delteCupboard, setCupboards }) => {
             });
             const data = await response.json();
             if (response.ok) {
-                setCupboards((prevCupboards) =>
-                    prevCupboards.map((cupboard) =>
-                        cupboard.id === data.updatedData.id ? { ...cupboard, name: data.updatedData.name } : cupboard
-                    )
+                // setCupboards((prevCupboards) =>
+                //     prevCupboards.map((cupboard) =>
+                //         cupboard.id === data.updatedData.id ? { ...cupboard, name: data.updatedData.name } : cupboard
+                //     )
 
-                );
+                // );
                 toast('Cupboard edited', {
                     position: "top-center",
                     autoClose: 1000,

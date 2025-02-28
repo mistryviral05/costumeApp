@@ -41,3 +41,15 @@ If you would like to contribute to this project, please follow these steps:
 ## License
 
 This project is licensed under the MIT License.
+
+
+## To Ask divya bhai
+   <!-- - what update in the user  -->
+   - What update in the Costumes
+   - Carts Problems
+   # Solutions : 
+      - create uniq id by admin 
+      - uniq id create using uuid package --> if bychance user will delete then mongodb id will be vari so it generate problems
+      - using mongodb uniq id --> if bychance user will delete then mongodb id will be vari so it generate problems
+      - using uniq username 
+

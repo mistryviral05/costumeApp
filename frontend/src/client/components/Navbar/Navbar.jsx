@@ -12,13 +12,26 @@ const Navbar = () => {
     setIsOpen(!isOpen);
   };
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
     let logout = false;
-    if(localStorage.getItem('clientToken')){
-      localStorage.removeItem('clientToken');
-      logout = true;
+    const clientToken = localStorage.getItem('clientToken');
+
+    if (clientToken) {
+      const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/clients/logout`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${clientToken}`
+
+        }
+      })
+      if (res.ok) {
+        const message = await res.json();
+        console.log(message.message)
+        localStorage.removeItem('clientToken');
+        logout = true;
+      }
     }
-    if(logout == true){
+    if (logout) {
       navigate('/');
     }
   };
@@ -26,8 +39,8 @@ const Navbar = () => {
   const menuItems = [
     { title: "Cupboards", icon: <Shirt className="w-5 h-5" />, path: "/client/homepage" },
     { title: "Gallery", icon: <Image className="w-5 h-5" />, path: "/client/Gallary" },
-    { title: "QR Code Scanner", icon: <QrCode className="w-5 h-5" />, path: "/client/qr-scanner" },
-    { title: "Add to Cart", icon: <ShoppingCart className="w-5 h-5" />, path: "/client/cartpage" },
+    { title: "Scanner", icon: <QrCode className="w-5 h-5" />, path: "/client/qr-scanner" },
+    { title: "Cart", icon: <ShoppingCart className="w-5 h-5" />, path: "/client/cartpage" },
   ];
 
   return (
@@ -43,15 +56,14 @@ const Navbar = () => {
               <NavLink
                 key={index}
                 to={item.path}
-                className={`flex items-center space-x-2 px-3 py-2 rounded-md transition-colors duration-200 ${
-                  currentPath === item.path ? "bg-purple-700" : "hover:text-purple-200"
-                }`}
+                className={`flex items-center space-x-2 px-3 py-2 rounded-md transition-colors duration-200 ${currentPath === item.path ? "bg-purple-700" : "hover:text-purple-200"
+                  }`}
               >
                 {item.icon}
                 <span>{item.title}</span>
               </NavLink>
             ))}
-            
+
             <button
               onClick={handleLogout}
               className="flex items-center space-x-2 px-4 py-2 rounded-md bg-purple-700 hover:bg-purple-600 transition-colors duration-200"
@@ -60,10 +72,10 @@ const Navbar = () => {
               <span>Logout</span>
             </button>
 
-            {/* Avatar moved to end */}
-            <div 
+            {/* Avatar */}
+            <div
               className="w-8 h-8 rounded-full bg-purple-700 flex items-center justify-center cursor-pointer hover:bg-purple-600 transition-colors duration-200"
-              onClick={() => navigate('/client/profile')} // Add your profile route here
+              onClick={() => navigate('/client/profile')}
             >
               <User className="w-5 h-5" />
             </div>
@@ -84,34 +96,35 @@ const Navbar = () => {
       {/* Mobile Menu */}
       {isOpen && (
         <div className="md:hidden">
-          <div className="px-2 pt-2 pb-3 space-y-1 bg-purple-900">
+          <div className="px-2 pt-2 pb-3 space-y-1 bg-purple-900 flex flex-col items-center">
             {menuItems.map((item, index) => (
               <NavLink
                 key={index}
                 to={item.path}
-                className={`flex items-center space-x-2 px-3 py-2 rounded-md transition-colors duration-200 ${
-                  currentPath === item.path ? "bg-purple-700" : "hover:bg-purple-800"
-                }`}
+                className={`flex items-center space-x-2 w-full px-3 py-2 rounded-md text-center transition-colors duration-200 ${currentPath === item.path ? "bg-purple-700" : "hover:bg-purple-800"
+                  }`}
               >
                 {item.icon}
                 <span>{item.title}</span>
               </NavLink>
             ))}
+
+            {/* Logout Button */}
             <button
               onClick={handleLogout}
-              className="flex items-center space-x-2 w-full px-3 py-2 rounded-md bg-purple-700 hover:bg-purple-600 transition-colors duration-200"
+              className="flex items-center justify-center space-x-2 w-full px-3 py-2 rounded-md bg-purple-700 hover:bg-purple-600 transition-colors duration-200"
             >
               <LogOut className="w-5 h-5" />
               <span>Logout</span>
             </button>
-            
-            {/* Avatar in mobile menu */}
-            <div 
-              className="flex items-center space-x-2 w-full px-3 py-2 rounded-md hover:bg-purple-800 transition-colors duration-200 cursor-pointer"
-              onClick={() => navigate('/client/profile')} // Add your profile route here
+
+            {/* Avatar with Profile Link */}
+            <div
+              className="flex items-center space-x-2 w-full px-3 py-2 rounded-md hover:bg-purple-800 transition-colors duration-200 cursor-pointer justify-center"
+              onClick={() => navigate('/client/profile')}
             >
-              <div className="w-8 h-8 rounded-full bg-purple-700 flex items-center justify-center">
-                <User className="w-5 h-5" />
+              <div className="w-10 h-10 rounded-full bg-purple-700 flex items-center justify-center">
+                <User className="w-6 h-6" />
               </div>
               <span>Profile</span>
             </div>

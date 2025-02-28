@@ -1,7 +1,8 @@
-import React, { useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { Search, ShoppingCart, Plus, Filter, Package, Loader } from 'lucide-react';
 import { toast, ToastContainer, Bounce } from "react-toastify";
 import { useNavigate } from 'react-router-dom';
+import { SocketContext } from '@/Context/SocketContext';
 const Gallery = () => {
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [categories, setCategories] = useState(["All"]);
@@ -12,6 +13,32 @@ const Gallery = () => {
   const navigate = useNavigate();
 
 
+  const {socket}= useContext(SocketContext)
+
+  useEffect(() => {
+
+    const handleDel = async(data)=>{
+      setCostumes((prevImages) => prevImages.filter(image => image.id !== data.message));
+    }
+    const handleUpdateQuantity  =  (data)=>{
+        setCostumes((prevCostumes)=>prevCostumes.map((e)=>e.id===data.id?{...e,quantity:data.newQuantity}:e))
+    }
+    const fetchRealTimeData = (data)=>{
+      
+      setCostumes((prev)=>[...prev,data.newDetails])
+  
+    }
+
+    socket.on("deleteGallary",handleDel)
+    socket.on("updateCostumeQuantity",handleUpdateQuantity)
+    socket.on("addNewCostumes",fetchRealTimeData)
+    return () => {
+      socket.off("deleteGallary",handleDel)
+      socket.off("updateCostumeQuantity",handleUpdateQuantity)
+      socket.off("addNewCostumes",fetchRealTimeData)
+      
+    }
+  }, [socket])
 
 
   const handleSearch = async()=>{
@@ -55,7 +82,7 @@ const Gallery = () => {
           theme: "light",
           transition: Bounce,
         });
-        fetchData();
+       
       }
     } catch (err) {
       console.log(err);

@@ -1,9 +1,10 @@
-import React, { useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import Card from '../../components/Card';
 import { HiOutlineEmojiSad } from 'react-icons/hi';
 import { ToastContainer, toast, Bounce } from 'react-toastify';
 import { useLocation } from 'react-router-dom';
 import { NavLink } from 'react-router-dom';
+import { SocketContext } from '@/Context/SocketContext';
 
 const CARDS_PER_PAGE = 12;
 
@@ -11,6 +12,33 @@ const Home = () => {
   const [cupboards, setCupboards] = useState([]);
   const [displayCount, setDisplayCount] = useState(CARDS_PER_PAGE);
   const location = useLocation();
+  const {socket}= useContext(SocketContext)
+
+
+
+ useEffect(() => {
+    const handleFetch = (data)=>{
+         setCupboards((prev)=>[...prev,data.newCupboard])
+    }
+    const handleDeleteCupboard = (data)=>{
+         setCupboards((prev)=>prev.filter((cupboard)=>cupboard.id!==data.id))
+    }
+ 
+    const handleUpdate = (data)=>{
+     setCupboards((prev)=>prev.map((e)=>e.id === data.id ?{...e,name:data.name}:e))
+    }
+ 
+    socket.on("addNewCupboard",handleFetch)
+    socket.on("deleteCupboard",handleDeleteCupboard)
+    socket.on("updateCupboard",handleUpdate)
+    
+    return () => {
+      socket.off("addNewCupboard",handleFetch)
+      socket.off("deleteCupboard",handleDeleteCupboard)
+      socket.off("updateCupboard",handleUpdate)
+     }
+   }, [socket])
+  
 
   const fetchCupboards = async () => {
     try {
@@ -29,7 +57,7 @@ const Home = () => {
   }, []);
 
   const deleteCupboard = (id) => {
-    setCupboards((prevCupboards) => prevCupboards.filter((c) => c.id !== id));
+    // setCupboards((prevCupboards) => prevCupboards.filter((c) => c.id !== id));
     toast('Cupboard deleted', {
       position: "top-center",
       autoClose: 1000,

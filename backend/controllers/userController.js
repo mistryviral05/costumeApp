@@ -45,14 +45,14 @@ exports.login = async (req, res) => {
 
         const isUsername = await User.findOne({ username: username });
         if (!isUsername) {
-            return res.json({ succes: false, message: "Username or password invalid" });
+            return res.status(400).json({ succes: false, error: "Username or password invalid" });
         }
 
         const isPassword = await bcrypt.compare(password, isUsername.password)
 
 
         if (!isPassword) {
-            return res.json({ succes: false, message: "Username or password invalid" });
+            return res.status(400).json({ succes: false, error: "Username or password invalid" });
         }
         const token = isUsername.generateAuthToken();
         res.cookie('token',token);

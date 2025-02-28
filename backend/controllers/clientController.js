@@ -1,9 +1,8 @@
 
 const bcrypt = require('bcrypt');
 const Client = require('../models/Client');
+const BlackListToken = require('../models/BlackListToken');
 require('dotenv').config();
-
-
 
 exports.signup = async (req, res) => {
     try {
@@ -41,48 +40,72 @@ exports.signup = async (req, res) => {
         res.json({ success: false, message: "Error occurred" });
     }
 }
-
-
-
-exports.login = async(req,res)=>{
+exports.login = async (req, res) => {
 
     const { email, password } = req.body;
-        try {
-    //   console.log(email,password)
-    
-            const isUsername = await Client.findOne({ email: email });
-            if (!isUsername) {
-                return res.json({ succes: false, message: "Username or password invalid" });
-            }
-    
-            const isPassword = await bcrypt.compare(password, isUsername.password)
-    
-    
-            if (!isPassword) {
-                return res.json({ succes: false, message: "Username or password invalid" });
-            }
-            const clientToken = isUsername.generateAuthToken();
-            res.cookie('token',clientToken);
-          
-            res.json({ succes: true, clientToken: clientToken });
-    
-    
-        } catch (err) { console.log(err); return res.json({ succes: false, message: "error comes" }) }
+    try {
+        //   console.log(email,password)
+        const isUsername = await Client.findOne({ email: email });
+
+        if (!isUsername) {
+            return res.status(400).json({ error: "Username or password invalid" }); 
+        }
+
+        const isPassword = await bcrypt.compare(password, isUsername.password);
+
+        if (!isPassword) {
+            return res.status(400).json({ error: "Username or password invalid" }); 
+        }
+
+        const clientToken = isUsername.generateAuthToken();
+        res.cookie("token", clientToken);
+
+        res.json({ success: true, clientToken: clientToken });
+
+
+
+    } catch (err) { console.log(err); return res.json({ succes: false, message: "error comes" }) }
 
 
 
 
 }
-
-
-exports.getUserDetails = async (req,res )=>{
+exports.getUserDetails = async (req, res) => {
     try {
-        const userDetails  = await Client.find();
-        if(!userDetails){
-            return res.json({message: "Username or password invalid"})
+        const userDetails = await Client.find();
+        if (!userDetails) {
+            return res.json({ message: "Username or password invalid" })
         }
-        return res.json({succes:true,message:userDetails});
+        return res.json({ succes: true, message: userDetails });
     } catch (error) {
-        return res.json({ succes: false}) 
+        return res.json({ succes: false })
+    }
+}
+exports.deleteUserDetailsById = async (req, res) => {
+
+    try {
+        const { id } = req.body;
+        if (!id) {
+            return res.json({ message: 'Id must be required' });
+        }
+        const user = await Client.findById(id);
+        if (!user) {
+            return res.json({ message: "Invalid" });
+        }
+        await Client.findByIdAndDelete(id);
+        return res.json({ succes: true, message: "success full deleted" });
+    } catch (error) {
+        return res.json({ succes: false })
+    }
+}
+exports.logOut = async (req, res) => {
+    try {
+        res.clearCookie("clientToken")
+        const clientToken = req.cookies.token || req.headers.authorization.split(' ')[1];
+        // console.log(clientToken)
+        await BlackListToken.create({ token: clientToken });
+        res.json({ success: true, message: "Logout" })
+    } catch (error) {
+        res.json({ success: false })
     }
 }

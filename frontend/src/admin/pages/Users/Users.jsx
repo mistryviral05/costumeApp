@@ -10,6 +10,7 @@ import {
 } from "@/components/ui/table";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { toast } from 'sonner';
 
 const Users = () => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -47,6 +48,33 @@ const Users = () => {
     setUsers(users.map(user => user._id === editingUserId ? editedUser : user));
     setEditingUserId(null);
   };
+
+  const handleDelete = async (userId) => {
+    let c = confirm("Are you sure want to delete the user");
+    if(c){
+      try {
+        const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/clients/deleteUserDetails`, {
+          method: "DELETE",
+          headers:{
+            "Content-Type":"application/json"
+          },
+          body:JSON.stringify({id:userId})
+        });
+    
+        if (res.ok) {
+          const message = await res.json();
+          toast.success(message.message)
+          setUsers(users.filter(user => user._id !== userId));
+        } else {
+          console.log("Failed to delete user");
+        }
+      } catch (error) {
+        console.log(error);
+      }
+    }
+  
+  };
+  
 
   const filteredUsers = users.filter(user =>
     user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -168,6 +196,7 @@ const Users = () => {
                       )}
                       <Button
                         variant="ghost"
+                        onClick={() => handleDelete(user._id)}
                         className="text-red-600 hover:text-red-800 p-0"
                       >
                         <Trash2 className="h-5 w-5" />

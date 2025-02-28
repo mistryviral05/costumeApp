@@ -107,7 +107,7 @@ const Dashboard = () => {
 
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-[1fr_2fr] gap-6 items-stretch mt-8">
+      <div className="grid grid-cols-1 xl:grid-cols-[1fr_2fr] gap-6 items-stretch mt-8">
         <CatagoryTable />
         <HolderTable />
       </div>

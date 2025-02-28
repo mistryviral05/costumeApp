@@ -2,6 +2,7 @@ const Cupboard = require('../models/Cupboard');
 const Details = require('../models/Details');
 const path = require('path');
 const fs = require('fs');
+const { getIO } = require('../socket');
 exports.addCupboard = async (req, res) => {
     try {
         const data = await req.body;
@@ -13,7 +14,7 @@ exports.addCupboard = async (req, res) => {
             space: data.space
         })
         await newCupboard.save();
-
+        getIO().emit("addNewCupboard",{newCupboard})
         res.json({ success: true, message: 'Data received' });
     } catch (error) {
         res.status(500).json({ success: false, message: error.message });
@@ -52,7 +53,7 @@ exports.updateCupboard =  async (req, res) => {
         await Details.updateMany({cpid:id},{$set:{cpname:name}},{new:true})
 
         if (data ) {
-
+            getIO().emit("updateCupboard",{id,name})
             res.json({ success: "Updated successfully", updatedData: data });
         } else {
             res.status(404).json({ error: "No document found with the given id" });
@@ -79,6 +80,7 @@ exports.deleteCupboards =  async (req, res) => {
         }
         await Details.deleteMany({ cpid: id })
         await Cupboard.findOneAndDelete({ id: id });
+        getIO().emit("deleteCupboard",{id})
         res.json({ success: true, message: 'Cupboard and it s item deleted' });
 
     } catch (error) {
