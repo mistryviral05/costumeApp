@@ -12,13 +12,19 @@ const userSchema = new mongoose.Schema({
         default: 1,
         min: 1,
     },
-    status:{
-        type:String,
-        default:"Not cleaned",
+    cleanedQuantity: {  // Number of costumes cleaned so far
+        type: Number,
+        default: 0,
+        min: 0,
+    },
+    status: {
+        type: String,
+        default: "Not Cleaned",
+        enum: ["Not Cleaned", "Partially Cleaned", "Fully Cleaned"],
     },
 
 
-    date: { type: Date, default:Date().now, }
+    date: { type: Date, default:Date.now, }
 
 
 

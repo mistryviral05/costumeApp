@@ -237,16 +237,7 @@ const Login = () => {
               </div>
             </form>
 
-            {/* CSS for animations */}
-            <style jsx>{`
-              @keyframes bounce-once {
-                0%, 100% { transform: translateY(0); }
-                50% { transform: translateY(-5px); }
-              }
-              .animate-bounce-once {
-                animation: bounce-once 0.5s ease-in-out;
-              }
-            `}</style>
+         
           </CardContent>
 
           <CardFooter className="flex justify-center pt-2 pb-6">

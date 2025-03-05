@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Mail, Lock, ArrowRight, AlertCircle } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
 
 function App() {
   const [email, setEmail] = useState("");
@@ -61,13 +61,16 @@ function App() {
 
         if (data.clientToken) {
           localStorage.setItem("clientToken", data.clientToken);
-          navigate("/client/homepage");
-          setEmail("");
-          setPassword("");
+          
+          // Add 5 second timeout before navigating
+          setTimeout(() => {
+            navigate("/client/homepage");
+            setEmail("");
+            setPassword("");
+          }, 5000);
         }
       } catch (error) {
         setServerError(error.message);
-      } finally {
         setIsLoading(false);
       }
     }
@@ -179,9 +182,9 @@ function App() {
             {/* Forgot password link */}
             <div className="flex items-center justify-end">
               <div className="text-sm">
-                <a href="#" className="font-medium text-purple-600 hover:text-purple-500 transition-colors">
+                <NavLink href="#" className="font-medium text-purple-600 hover:text-purple-500 transition-colors">
                   Forgot your password?
-                </a>
+                </NavLink>
               </div>
             </div>
 
@@ -203,40 +206,9 @@ function App() {
                 <div className="absolute bottom-0 left-0 h-1 bg-white/70 rounded-b-xl animate-loader"></div>
               )}
             </div>
-
-            {/* Sign up option */}
-            <div className="text-center mt-4">
-              <p className="text-sm text-gray-600">
-                Don't have an account?{" "}
-                <a href="#" className="font-medium text-purple-600 hover:text-purple-500 transition-colors">
-                  Sign up
-                </a>
-              </p>
-            </div>
           </form>
         </div>
       </div>
-
-      {/* Add the CSS animation for the loader */}
-      <style jsx>{`
-        @keyframes loadingAnimation {
-          0% {
-            width: 0%;
-          }
-          100% {
-            width: 100%;
-          }
-        }
-        .animate-loader {
-          animation: loadingAnimation 1.5s ease-in-out infinite;
-        }
-        
-        @media (max-width: 640px) {
-          .max-w-md {
-            width: 90%;
-          }
-        }
-      `}</style>
     </div>
   );
 }

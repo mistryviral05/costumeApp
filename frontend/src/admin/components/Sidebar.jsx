@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { 
   DoorClosed, 
@@ -13,29 +13,85 @@ import {
   LogOut,
   User,
   Key,
-  WashingMachine
+  WashingMachine,
+  Settings,
+  ChevronDown,
+  AlertCircle,        // Added for Missing
+  Scissors,          // Added for Tear
+  Clock,            // Added for Pending
+  History,          // Added for Logs
+  MessageSquare,     // Added for WhatsApp
+  Wrench,
+  PackageX,
+  Logs
 } from 'lucide-react';
 
 const Sidebar = ({ isOpen, setIsOpen }) => {
   const navigate = useNavigate();
   const location = useLocation();
   const [showProfileMenu, setShowProfileMenu] = useState(false);
+  const [activeCategory, setActiveCategory] = useState(null);
 
-  const menuItems = [
-    { title: 'Dashboard', icon: <Home size={20} />, path: '/admin/dashboard' },
-    { title: 'Cupboards', icon: <DoorClosed size={20} />, path: '/admin/home' },
-    { title: 'Users', icon: <Users size={20} />, path: '/admin/users' },
-    { title: 'Add New User', icon: <UserPlus size={20} />, path: '/admin/users/new' },
-    { title: 'Add New Costume', icon: <Plus size={20} />, path: '/admin/addNewCostume' },
-    { title: 'Washing', icon: <WashingMachine size={20} />, path: '/admin/wash' },
-    { title: 'Gallary', icon: <GalleryVertical size={20} />, path: '/admin/gallary' },
+  // Organize menu items by categories with improved icons
+  const menuCategories = [
+    {
+      id: 'main',
+      title: 'Main',
+      items: [
+        { title: 'Dashboard', icon: <Home size={20} />, path: '/admin/dashboard' },
+        { title: 'Cupboards', icon: <DoorClosed size={20} />, path: '/admin/home' },
+      ]
+    },
+    {
+      id: 'management',
+      title: 'Management',
+      items: [
+        { title: 'Users', icon: <Users size={20} />, path: '/admin/users' },
+        { title: 'Add New User', icon: <UserPlus size={20} />, path: '/admin/users/new' },
+        { title: 'Add New Costume', icon: <Shirt size={20} />, path: '/admin/addNewCostume' }, // Changed Plus to Shirt
+      ]
+    },
+    {
+      id: 'operations',
+      title: 'Operations',
+      items: [
+        { title: 'Washing', icon: <WashingMachine size={20} />, path: '/admin/wash' },
+        { title: 'Gallery', icon: <GalleryVertical size={20} />, path: '/admin/gallary' },
+      ]
+    },
+    {
+      id: 'returnPolicy',
+      title: 'Return Policy',
+      items: [
+        { title: 'Lost', icon: <AlertCircle size={20} />, path: '/admin/return-policy/Lost' }, // Changed LogOut to AlertCircle
+        { title: 'Damaged', icon: <PackageX size={20} />, path: '/admin/return-policy/Damaged' },         // Changed LogOut to Scissors
+         // Changed LogOut to Clock
+      ]
+    },
+    {
+      id: 'logs',
+      title: 'Logs & History',
+      items: [
+        { title: 'All logs', icon: <Logs size={20} />, path: '/admin/allLogs' },   // Changed Key to History
+      ]
+    }
   ];
 
-  const handleLogout = async() => {
+  // Check which category contains the current path
+  useEffect(() => {
+    for (const category of menuCategories) {
+      if (category.items.some(item => item.path === location.pathname)) {
+        setActiveCategory(category.id);
+        break;
+      }
+    }
+  }, [location.pathname]);
+
+  const handleLogout = async () => {
     try {
-      localStorage.removeItem('token')
+      localStorage.removeItem('token');
       navigate('/admin/');
-    } catch(err) {
+    } catch (err) {
       console.log(err);
     }
   };
@@ -50,113 +106,134 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
       title: 'Change Password', 
       icon: <Key size={16} />,
       onClick: () => navigate('/admin/change-password')
+    },
+    { 
+      title: 'Settings', 
+      icon: <Settings size={16} />,
+      onClick: () => navigate('/admin/settings')
     }
   ];
 
+  const toggleCategory = (categoryId) => {
+    setActiveCategory(activeCategory === categoryId ? null : categoryId);
+  };
+
   return (
-    <>
-      {/* Mobile backdrop */}
-      {isOpen && (
-        <div 
-          className="fixed inset-0 bg-gray-900/50 z-40 md:hidden"
-          onClick={() => setIsOpen(false)}
-        />
-      )}
+    <aside
+      className={`fixed left-0 top-0 h-screen bg-gray-900 text-white transition-all duration-300 z-50
+        shadow-xl overflow-hidden flex flex-col
+        ${isOpen ? 'w-56' : 'w-16'} 
+        ${isOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}`}
+    >
+      {/* Header */}
+      <div className="flex items-center justify-between p-4 border-b border-gray-700">
+        {isOpen && (
+          <h1 className="text-xl font-bold bg-gradient-to-r from-purple-400 to-pink-500 bg-clip-text text-transparent">
+            Admin Panel
+          </h1>
+        )}
+        <button
+          onClick={() => setIsOpen(!isOpen)}
+          className="p-1.5 rounded-lg bg-gray-800 hover:bg-gray-700 transition-colors"
+        >
+          {isOpen ? <ChevronLeft size={20} /> : <Menu size={20} />}
+        </button>
+      </div>
 
-      {/* Sidebar */}
-      <aside
-        className={`fixed left-0 top-0 h-screen bg-gray-900 text-white transition-all duration-300 z-50
-          ${isOpen ? 'w-64' : 'w-16'} 
-          ${isOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}`}
-      >
-        <div className="flex items-center justify-between p-4 border-b border-gray-700">
-          {isOpen && (
-            <h1 className="text-xl font-bold bg-gradient-to-r from-purple-400 to-pink-500 bg-clip-text text-transparent">
-              Admin Panel
-            </h1>
-          )}
-          <button
-            onClick={() => setIsOpen(!isOpen)}
-            className="p-1.5 rounded-lg bg-gray-800 hover:bg-gray-700 transition-colors"
-          >
-            {isOpen ? <ChevronLeft size={20} /> : <Menu size={20} />}
-          </button>
-        </div>
-
-        <nav className="mt-6 px-2">
-          {menuItems.map((item) => (
-            <button
-              key={item.path}
-              onClick={() => {
-                navigate(item.path);
-                if (window.innerWidth < 768) setIsOpen(false);
-              }}
-              className={`w-full flex items-center gap-4 px-3 py-3 rounded-lg mb-2 transition-all duration-200 ${
-                location.pathname === item.path
-                  ? 'bg-gray-800 text-purple-400'
-                  : 'hover:bg-gray-800/50'
-              }`}
-            >
-              <div className={`${!isOpen ? 'mx-auto' : ''}`}>
-                {item.icon}
-              </div>
-              {isOpen && (
-                <span className="text-sm font-medium">{item.title}</span>
-              )}
-            </button>
-          ))}
-        </nav>
-
-        <div className="absolute bottom-0 left-0 right-0 p-4">
-          <div className={`flex flex-col gap-4 ${!isOpen ? 'items-center' : ''}`}>
-            <button
-              onClick={handleLogout}
-              className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-red-400 hover:bg-red-400/10 transition-colors"
-            >
-              <LogOut size={20} className={`${!isOpen ? 'mx-auto' : ''}`} />
-              {isOpen && <span className="text-sm font-medium">Logout</span>}
-            </button>
-            
-            <div className="relative">
-              <button
-                onClick={() => setShowProfileMenu(!showProfileMenu)}
-                className={`flex items-center gap-4 p-2 rounded-lg hover:bg-gray-800/50 transition-colors
-                  ${!isOpen ? 'justify-center' : ''}`}
+      {/* Navigation */}
+      <nav className="flex-1 overflow-y-auto py-4 px-3 scrollbar-thin scrollbar-thumb-gray-700 scrollbar-track-gray-900">
+        {menuCategories.map((category) => (
+          <div key={category.id} className="mb-4">
+            {isOpen && (
+              <button 
+                onClick={() => toggleCategory(category.id)}
+                className="w-full flex items-center justify-between text-gray-400 text-xs font-bold uppercase tracking-wider px-2 py-2 hover:text-gray-300"
               >
-                <div className="w-8 h-8 rounded-full bg-gradient-to-r from-purple-400 to-pink-500 flex items-center justify-center">
-                  <Users size={16} />
-                </div>
-                {isOpen && (
-                  <div>
-                    <p className="text-sm font-medium">Admin User</p>
-                    <p className="text-xs text-gray-400">admin@example.com</p>
-                  </div>
-                )}
+                <span>{category.title}</span>
+                <ChevronDown 
+                  size={14} 
+                  className={`transition-transform ${activeCategory === category.id ? 'transform rotate-180' : ''}`}
+                />
               </button>
-
-              {/* Profile Popup Menu */}
-              {showProfileMenu && (
-                <div className="absolute bottom-full left-0 mb-2 w-48 bg-gray-800 rounded-lg shadow-lg py-2 border border-gray-700">
-                  {profileOptions.map((option, index) => (
-                    <button
-                      key={index}
-                      onClick={() => {
-                        option.onClick();
-                        setShowProfileMenu(false);
-                      }}
-                      className="w-full flex items-center gap-3 px-4 py-2 text-sm hover:bg-gray-700 transition-colors"
-                    >
-                      {option.icon}
-                      <span>{option.title}</span>
-                    </button>
-                  ))}
-                </div>
-              )}
+            )}
+            
+            <div className={`space-y-1 mt-1 ${isOpen && activeCategory !== category.id ? 'hidden' : ''}`}>
+              {category.items.map((item) => (
+                <button
+                  key={item.path}
+                  onClick={() => {
+                    navigate(item.path);
+                    if (window.innerWidth < 768) setIsOpen(false);
+                  }}
+                  className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-200 ${
+                    location.pathname === item.path
+                      ? 'bg-purple-600/20 text-purple-400'
+                      : 'hover:bg-gray-800'
+                  }`}
+                >
+                  <div className={`${!isOpen ? 'mx-auto' : ''} text-lg`}>
+                    {item.icon}
+                  </div>
+                  {isOpen && (
+                    <span className="text-sm font-medium truncate">{item.title}</span>
+                  )}
+                </button>
+              ))}
             </div>
           </div>
+        ))}
+      </nav>
+
+      {/* Footer - Profile & Logout */}
+      <div className="p-3 border-t border-gray-800">
+        {/* Logout Button */}
+        <button
+          onClick={handleLogout}
+          className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-red-400 hover:bg-red-500/10 transition-colors mb-3"
+        >
+          <LogOut size={20} className={`${!isOpen ? 'mx-auto' : ''}`} />
+          {isOpen && <span className="text-sm font-medium">Logout</span>}
+        </button>
+        
+        {/* Profile Section */}
+        <div className="relative">
+          <button
+            onClick={() => setShowProfileMenu(!showProfileMenu)}
+            className={`w-full flex items-center gap-3 p-2 rounded-lg hover:bg-gray-800 transition-colors
+              ${!isOpen ? 'justify-center' : ''}`}
+          >
+            <div className="w-8 h-8 rounded-full bg-gradient-to-r from-purple-400 to-pink-500 flex items-center justify-center flex-shrink-0">
+              <User size={16} />
+            </div>
+            {isOpen && (
+              <div className="truncate">
+                <p className="text-sm font-medium truncate">Admin User</p>
+                <p className="text-xs text-gray-400 truncate">admin@example.com</p>
+              </div>
+            )}
+          </button>
+
+          {/* Profile Popup Menu */}
+          {showProfileMenu && (
+            <div className="absolute bottom-full left-0 mb-2 w-48 bg-gray-800 rounded-lg shadow-lg py-2 border border-gray-700 z-10">
+              {profileOptions.map((option, index) => (
+                <button
+                  key={index}
+                  onClick={() => {
+                    option.onClick();
+                    setShowProfileMenu(false);
+                  }}
+                  className="w-full flex items-center gap-3 px-4 py-2.5 text-sm hover:bg-gray-700 transition-colors"
+                >
+                  {option.icon}
+                  <span className="truncate">{option.title}</span>
+                </button>
+              ))}
+            </div>
+          )}
         </div>
-      </aside>
-    </>
+      </div>
+    </aside>
   );
 };
 

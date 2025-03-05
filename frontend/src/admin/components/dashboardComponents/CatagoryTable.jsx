@@ -1,8 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Edit, Trash2, Check, X } from 'lucide-react'; // Adding Check and X icons for save
-
 import { toast } from "sonner";
-import { ToastContainer, Bounce } from 'react-toastify';
 
 const CatagoryTable = () => {
   const [categories, setCategories] = useState([]);
@@ -60,18 +58,7 @@ const CatagoryTable = () => {
 
       if (res.ok) {
         const message = await res.json();
-        toast(message.message, {
-          position: "top-center",
-          autoClose: 1000,
-          hideProgressBar: false,
-          closeOnClick: false,
-          pauseOnHover: true,
-          draggable: true,
-          progress: undefined,
-          theme: "light",
-          transition: Bounce,
-
-        });
+        toast.success(message.message)
         fetchData();  // Refresh the category list after updating
         setEditCategoryId(null);  // Exit edit mode
       } else {
@@ -91,20 +78,7 @@ const CatagoryTable = () => {
 
   return (
     <div className="bg-white rounded-lg shadow p-6">
-      <ToastContainer
-        position="top-center"
-        autoClose={5000}
-        hideProgressBar={false}
-        newestOnTop={false}
-        closeOnClick={false}
-        rtl={false}
-        pauseOnFocusLoss
-        draggable
-        pauseOnHover
-        theme="dark"
-        transition={Bounce}
-
-      />
+     
       <div className="border-b pb-4 mb-4">
         <h2 className="text-lg font-semibold">Category Management</h2>
       </div>

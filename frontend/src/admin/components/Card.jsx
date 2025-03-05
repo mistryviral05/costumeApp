@@ -1,8 +1,7 @@
 import React, {  useState } from 'react';
 import { Edit, Trash, ArrowRight, QrCode } from 'lucide-react';
 import { NavLink } from 'react-router-dom';
-
-import { ToastContainer, toast, Bounce } from 'react-toastify';
+import { toast } from 'sonner';
 
 const Card = ({ cupBoard, space, place, id, delteCupboard, setCupboards }) => {
     const [isRenaming, setIsRenaming] = useState(false);
@@ -25,7 +24,7 @@ const Card = ({ cupBoard, space, place, id, delteCupboard, setCupboards }) => {
                 });
 
                 if (response.ok) {
-
+                    toast.success("Cupboard Deleted")
                     delteCupboard(id);
                 }
             } catch (err) {
@@ -50,18 +49,7 @@ const Card = ({ cupBoard, space, place, id, delteCupboard, setCupboards }) => {
                 //     )
 
                 // );
-                toast('Cupboard edited', {
-                    position: "top-center",
-                    autoClose: 1000,
-                    hideProgressBar: false,
-                    closeOnClick: false,
-                    pauseOnHover: true,
-                    draggable: true,
-                    progress: undefined,
-                    theme: "light",
-                    transition: Bounce,
-
-                });
+            toast.success("Cupboard Updated")
 
                 setIsRenaming(false);
             }

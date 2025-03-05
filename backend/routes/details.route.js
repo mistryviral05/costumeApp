@@ -1,7 +1,8 @@
 const express = require('express')
 const router = express.Router();
 const connectDb = require('../db/connectDb')
-const detailControllers = require("../controllers/detailsController")
+const detailControllers = require("../controllers/detailsController");
+const { chageStatusDamaged, fetchLogs, deleteDamagedCostumes } = require('../controllers/damage.controller');
 connectDb();
 router.post('/addCostume', detailControllers.addCostume);
 router.delete('/deleteCostume/:id',detailControllers.deleteCostumeById );
@@ -23,7 +24,12 @@ router.get('/getAssignedDetailsById/:id',detailControllers.getAssignedDetailsByI
 router.get('/costumes/:id',detailControllers.getCostumeByCostumeId);
 router.delete('/deleteHolderDetails',detailControllers.deleteHolderDetails);
 router.put('/updateHolderDetails',detailControllers.updateHolderDetails);
-
+router.post('/updateReturnStatus',detailControllers.updateReturnStatus);
+router.get('/getDamagedCostumes',detailControllers.getDamagedCostumes);
+router.get('/getLostCostumes',detailControllers.getLostCostumes);
+router.put('/updateStatusDamged',chageStatusDamaged)
+router.delete('/deleteDamagedCostumes',deleteDamagedCostumes)
+router.get('/fetchLogs',fetchLogs)
 
 
 module.exports = router;

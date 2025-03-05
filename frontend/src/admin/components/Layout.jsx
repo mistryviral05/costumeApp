@@ -3,23 +3,36 @@ import Navbar from './Navbar';
 import Sidebar from './Sidebar';
 
 const Layout = ({ children }) => {
-  const [isSidebarOpen, setIsSidebarOpen] = useState(true);  // Default to open
+  // Initialize state from localStorage, default to true if not found
+  const [isSidebarOpen, setIsSidebarOpen] = useState(() => {
+    const savedState = localStorage.getItem('sidebarOpen');
+    return savedState !== null ? JSON.parse(savedState) : true;
+  });
   const [isMobile, setIsMobile] = useState(false);
+
+  // Update localStorage whenever isSidebarOpen changes
+  useEffect(() => {
+    localStorage.setItem('sidebarOpen', JSON.stringify(isSidebarOpen));
+  }, [isSidebarOpen]);
 
   useEffect(() => {
     const handleResize = () => {
-      setIsMobile(window.innerWidth < 768);  // Change breakpoint as needed
+      const mobile = window.innerWidth < 768;
+      setIsMobile(mobile);
     };
-    
+
     window.addEventListener('resize', handleResize);
-    handleResize();  // Initial check
-    if(window.innerWidth<768){
-      setIsSidebarOpen(false)
+    handleResize(); // Initial check
+
+    // Close sidebar on mobile by default only on first load
+    if (window.innerWidth < 768 && localStorage.getItem('sidebarOpen') === null) {
+      setIsSidebarOpen(false);
     }
+
     return () => {
       window.removeEventListener('resize', handleResize);
     };
-  }, []);
+  }, []);  
 
   return (
     <div className="min-h-screen bg-gray-100">
@@ -42,12 +55,14 @@ const Layout = ({ children }) => {
 
       {/* Main content */}
       <div className={`flex flex-col min-h-screen transition-all duration-300 ${
-        isSidebarOpen ? 'md:ml-64' : 'md:ml-16'
+        isSidebarOpen ? 'md:ml-56' : 'md:ml-16'
       }`}>
         <Navbar setIsSidebarOpen={setIsSidebarOpen} />
-        <main className="flex-1 p-1 md:p-4 mt-2">
-          {children}
-        </main>
+        <div className="">
+          <main className="flex-1 p-2 md:p-4 mt-2">
+            {children}
+          </main>
+        </div>
       </div>
     </div>
   );

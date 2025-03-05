@@ -1,16 +1,41 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { NavLink, useLocation, useNavigate } from "react-router-dom";
-import { Menu, X, Shirt, Image, QrCode, ShoppingCart, LogOut, User } from "lucide-react";
+import { Menu, X, Shirt, Image, QrCode, ShoppingCart, LogOut, User, WashingMachine } from "lucide-react";
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
   const currentPath = location.pathname;
+  const navbarRef = useRef(null);
 
   const toggleMenu = () => {
     setIsOpen(!isOpen);
   };
+
+  // Close menu when route changes
+  useEffect(() => {
+    setIsOpen(false);
+  }, [location]);
+
+  // Close menu when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (navbarRef.current && !navbarRef.current.contains(event.target)) {
+        setIsOpen(false);
+      }
+    };
+
+    // Add event listener when menu is open
+    if (isOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+
+    // Cleanup function
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [isOpen]);
 
   const handleLogout = async () => {
     let logout = false;
@@ -21,16 +46,17 @@ const Navbar = () => {
         method: "POST",
         headers: {
           Authorization: `Bearer ${clientToken}`
-
         }
-      })
+      });
+      
       if (res.ok) {
         const message = await res.json();
-        console.log(message.message)
+        console.log(message.message);
         localStorage.removeItem('clientToken');
         logout = true;
       }
     }
+    
     if (logout) {
       navigate('/');
     }
@@ -41,10 +67,11 @@ const Navbar = () => {
     { title: "Gallery", icon: <Image className="w-5 h-5" />, path: "/client/Gallary" },
     { title: "Scanner", icon: <QrCode className="w-5 h-5" />, path: "/client/qr-scanner" },
     { title: "Cart", icon: <ShoppingCart className="w-5 h-5" />, path: "/client/cartpage" },
+    { title: "Washing", icon: <WashingMachine className="w-5 h-5" />, path: "/client/clientWashing" },
   ];
 
   return (
-    <nav className="bg-purple-900 sticky top-0 z-50 text-white">
+    <nav className="bg-purple-900 sticky top-0 z-50 text-white" ref={navbarRef}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
@@ -56,8 +83,9 @@ const Navbar = () => {
               <NavLink
                 key={index}
                 to={item.path}
-                className={`flex items-center space-x-2 px-3 py-2 rounded-md transition-colors duration-200 ${currentPath === item.path ? "bg-purple-700" : "hover:text-purple-200"
-                  }`}
+                className={`flex items-center space-x-2 px-3 py-2 rounded-md transition-colors duration-200 ${
+                  currentPath === item.path ? "bg-purple-700" : "hover:text-purple-200"
+                }`}
               >
                 {item.icon}
                 <span>{item.title}</span>
@@ -101,8 +129,9 @@ const Navbar = () => {
               <NavLink
                 key={index}
                 to={item.path}
-                className={`flex items-center space-x-2 w-full px-3 py-2 rounded-md text-center transition-colors duration-200 ${currentPath === item.path ? "bg-purple-700" : "hover:bg-purple-800"
-                  }`}
+                className={`flex items-center space-x-2 w-full px-3 py-2 rounded-md text-center transition-colors duration-200 ${
+                  currentPath === item.path ? "bg-purple-700" : "hover:bg-purple-800"
+                }`}
               >
                 {item.icon}
                 <span>{item.title}</span>

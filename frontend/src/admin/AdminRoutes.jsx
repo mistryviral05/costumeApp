@@ -18,6 +18,10 @@ import Costumes from './pages/Costumes/Costumes';
 import Page from './pages/Page/Page';
 import Qrcode from './pages/QrCode/Qrcode';
 import Scan from './pages/Scan/Scan';
+import Profile from './pages/Profile/Profile';
+import Damaged from './pages/Damaged/Damaged';
+import Lost from './pages/Lost/Lost';
+import Logs from './pages/Logs/Logs';
 
 export const getAdminRoutes =  [
   {
@@ -133,5 +137,25 @@ export const getAdminRoutes =  [
   {
     path: '/admin/wash',
     element: <><AuthProtected><Layout><Washing/></Layout></AuthProtected></>
+  }
+  ,
+  {
+    path: '/admin/profile',
+    element: <><AuthProtected><Layout><Profile/></Layout></AuthProtected></>
+  }
+  ,
+  {
+    path: '/admin/return-policy/Damaged',
+    element: <><AuthProtected><Layout><Damaged/></Layout></AuthProtected></>
+  }
+  ,
+  {
+    path: '/admin/return-policy/Lost',
+    element: <><AuthProtected><Layout><Lost/></Layout></AuthProtected></>
+  }
+  ,
+  {
+    path: '/admin/allLogs',
+    element: <><AuthProtected><Layout><Logs/></Layout></AuthProtected></>
   }
 ];

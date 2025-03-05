@@ -56,7 +56,6 @@ exports.getWashingClothes = async (req, res) => {
 
 exports.markAsClean = async (req, res) => {
     try {
-
         const { date, costumes } = req.body;
 
         if (!date || !costumes || costumes.length === 0) {
@@ -70,51 +69,56 @@ exports.markAsClean = async (req, res) => {
         const endOfDay = new Date(date);
         endOfDay.setHours(23, 59, 59, 999);
 
-        // ✅ Find only "Not cleaned" costumes from Washing
+        // ✅ Find "Not Cleaned" or "Partially Cleaned" costumes
         const washingCostumes = await Washing.find({
             date: { $gte: startOfDay, $lt: endOfDay },
             id: { $in: costumes },
-            status: "Not cleaned" // Only process costumes that are not yet cleaned
+            status: { $in: ["Not Cleaned", "Partially Cleaned"] }
         });
 
         if (washingCostumes.length === 0) {
-            return res.json({ message: "Alredy cleaned" });
+            return res.json({ message: "Already cleaned" });
         }
 
-        // ✅ Update their status to "Cleaned"
-        await Washing.updateMany(
-            { date: { $gte: startOfDay, $lt: endOfDay }, id: { $in: costumes }, status: "Not cleaned" },
-            { $set: { status: "Cleaned" } }
-        );
+        // ✅ Loop through each washing item to update cleanedQuantity correctly
+        for (const item of washingCostumes) {
+            const remainingQuantity = item.quantity - item.cleanedQuantity; // Calculate uncleaned quantity
 
-        // ✅ Increase quantity in Details collection only for newly cleaned costumes
-        for (const washingItem of washingCostumes) {
-            await Details.findOneAndUpdate(
-                { id: washingItem.id },
-                { $inc: { quantity: washingItem.quantity } }, // Add back the quantity
-                { new: true }
+            await Washing.updateOne(
+                { id: item.id },
+                { 
+                    $set: { status: "Fully Cleaned" },
+                    $inc: { cleanedQuantity: remainingQuantity }  // ✅ Only add remaining quantity
+                },
+                {new:true,runValidators:true}
             );
+
+            // ✅ Restore only the remaining uncleaned quantity in Details
+            if (remainingQuantity > 0) {
+                await Details.findOneAndUpdate(
+                    { id: item.id },
+                    { $inc: { quantity: remainingQuantity } }, // ✅ Add back only uncleaned quantity
+                    { new: true, runValidators: true }
+                );
+            }
         }
 
         // ✅ Emit socket event
         getIO().emit("washingClean", {
             message: "Costumes marked as cleaned",
-            costumes: washingCostumes.map(c => c.id), // Send only updated costumes
+            costumes: washingCostumes.map(c => c.id),
             date,
-            status: "Cleaned"
+            status: "Fully Cleaned"
         });
 
         return res.json({ message: "Selected costumes marked as cleaned successfully." });
 
-
-
-
-
-
     } catch (error) {
-        res.json({ success: false })
+        console.error("Error processing request:", error);
+        return res.status(500).json({ error: "Internal server error." });
     }
-}
+};
+
 exports.deleteWashingClothes = async (req, res) => {
     try {
         const { date, id } = req.body;
@@ -134,7 +138,7 @@ exports.deleteWashingClothes = async (req, res) => {
         const deletedEntry = await Washing.findOneAndDelete({
             id: id,
             date: { $gte: startOfDay, $lte: endOfDay },
-            status: "Cleaned"  // ✅ Only delete if already cleaned
+            status: "Fully Cleaned"  // ✅ Only delete if already cleaned
         });
         
         if (!deletedEntry) {
@@ -149,3 +153,57 @@ exports.deleteWashingClothes = async (req, res) => {
         res.json({ success: false })
     }
 }
+
+
+
+exports.partialClean = async (req, res) => {
+    const { date, costumeId, cleanedQuantity } = req.body;
+
+    try {
+        if (!date || !costumeId || !cleanedQuantity) {
+            return res.status(400).json({ success: false, message: "All fields are required" });
+        }
+
+        // Find existing wash record
+        let washRecord = await Washing.findOne({ id: costumeId });
+
+        if (!washRecord) {
+            return res.status(404).json({ success: false, message: "Washing record not found" });
+        }
+
+        // Ensure cleaned quantity does not exceed total given quantity
+        if (washRecord.cleanedQuantity + cleanedQuantity > washRecord.quantity) {
+            return res.status(400).json({ success: false, message: "Cleaned quantity exceeds total given quantity" });
+        }
+
+        // Update cleaned quantity and status
+        if (cleanedQuantity === washRecord.quantity) {
+            washRecord.status = "Fully Cleaned";
+            washRecord.cleanedQuantity = washRecord.quantity;
+        } else if (cleanedQuantity === (washRecord.quantity - washRecord.cleanedQuantity)) {
+            washRecord.status = "Fully Cleaned";
+            washRecord.cleanedQuantity += cleanedQuantity;
+        } else {
+            washRecord.status = "Partially Cleaned";
+            washRecord.cleanedQuantity += cleanedQuantity;
+            washRecord.date = date || new Date();
+        }
+
+        // ✅ Save washing record
+        await washRecord.save();
+
+        // ✅ Restore quantity in Details collection
+        await Details.findOneAndUpdate(
+            { id: costumeId },
+            { $inc: { quantity: cleanedQuantity } }, // Add back the cleaned quantity
+            { new: true }
+        );
+
+        res.status(200).json({ success: true, message: "Partial clean recorded successfully", washRecord });
+
+    } catch (error) {
+        console.error("Error in partialClean:", error);
+        res.status(500).json({ success: false, message: "Internal Server Error" });
+    }
+};
+

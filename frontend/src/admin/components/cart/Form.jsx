@@ -1,20 +1,20 @@
 import React, { useState } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { toast, ToastContainer, Bounce } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
-const Form = ({cartId}) => {
+const Form = ({ cartId }) => {
     const [formData, setFormData] = useState({
         personname: '',
         contact: '',
-        email: '',
-        address: '',
+        Refrence: '',
         deadline: ''
     });
 
     const [errors, setErrors] = useState({});
     const location = useLocation()
-  const currentPath = location.pathname
+    const navigate = useNavigate()
+    const currentPath = location.pathname
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -39,17 +39,8 @@ const Form = ({cartId}) => {
             newErrors.contact = 'Contact Number must be 10 digits';
         }
 
-        // Email validation
-        if (!formData.email.trim()) {
-            newErrors.email = 'Email is required';
-        } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
-            newErrors.email = 'Invalid Email address';
-        }
 
-        // Address validation
-        if (!formData.address.trim()) {
-            newErrors.address = 'Address is required';
-        }
+
 
         // Deadline validation
         if (!formData.deadline) {
@@ -60,44 +51,53 @@ const Form = ({cartId}) => {
         return Object.keys(newErrors).length === 0;
     };
 
-    const handleSubmit = async(e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
 
         if (validate()) {
             console.log('Form submitted:', formData);
             console.log(cartId)
-            try{
-                const res = await fetch(`${import.meta.env.VITE_BACKEND_URL }/cpdetails/assignTo`,{
-                    method:"POST",
-                    headers:{
-                        'Content-Type':'application/json',
+            try {
+                const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/cpdetails/assignTo`, {
+                    method: "POST",
+                    headers: {
+                        'Content-Type': 'application/json',
                     },
-                    body:JSON.stringify({cartId:cartId ,...formData})
+                    body: JSON.stringify({ cartId: cartId, ...formData })
                 })
-                if(res.ok){
+                if (res.ok) {
                     const message = await res.json();
-                       toast.success(message.message, {
-                                position: "top-center",
-                                autoClose: 1000,
-                                hideProgressBar: false,
-                                closeOnClick: true,
-                                pauseOnHover: true,
-                                draggable: true,
-                                theme: "light",
-                                transition: Bounce,
-                              });
-                              setFormData({
-                                personname: '',
-                                contact: '',
-                                email: '',
-                                address: '',
-                                deadline: ''
-                              })
+                    toast.success(message.message, {
+                        position: "top-center",
+                        autoClose: 1000,
+                        hideProgressBar: false,
+                        closeOnClick: true,
+                        pauseOnHover: true,
+                        draggable: true,
+                        theme: "light",
+                        transition: Bounce,
+                    });
+                    setFormData({
+                        personname: '',
+                        contact: '',
+                        Refrence: '',
+                        deadline: ''
+                    })
 
-                   
+                    if (location.pathname === '/admin/Gallary/cart') {
+
+                        setTimeout(() => {
+                            
+                            navigate('/admin/dashboard');
+                        }, 1000);
+                    }
+                    
+
+
+
                 }
 
-            }catch(err){
+            } catch (err) {
                 console.log(err);
             }
         }
@@ -105,7 +105,7 @@ const Form = ({cartId}) => {
 
     return (
         <div className="bg-gray-50 p-6 w-full rounded-lg">
-             <ToastContainer />
+            <ToastContainer />
             <h3 className="text-lg font-semibold mb-3">Give to Another Person</h3>
             <form className="space-y-4" onSubmit={handleSubmit}>
                 {/* Recipient Name */}
@@ -116,9 +116,8 @@ const Form = ({cartId}) => {
                         name="personname"
                         value={formData.personname}
                         onChange={handleChange}
-                        className={`mt-1 block w-full p-2 border ${
-                            errors.name ? 'border-red-500' : 'border-gray-300'
-                        } rounded-md`}
+                        className={`mt-1 block w-full p-2 border ${errors.name ? 'border-red-500' : 'border-gray-300'
+                            } rounded-md`}
                         required
                     />
                     {errors.name && <p className="text-red-500 text-sm mt-1">{errors.name}</p>}
@@ -132,44 +131,27 @@ const Form = ({cartId}) => {
                         name="contact"
                         value={formData.contact}
                         onChange={handleChange}
-                        className={`mt-1 block w-full p-2 border ${
-                            errors.contact ? 'border-red-500' : 'border-gray-300'
-                        } rounded-md`}
+                        className={`mt-1 block w-full p-2 border ${errors.contact ? 'border-red-500' : 'border-gray-300'
+                            } rounded-md`}
                         required
                     />
                     {errors.contact && <p className="text-red-500 text-sm mt-1">{errors.contact}</p>}
                 </div>
 
-                {/* Email Address */}
-                <div>
-                    <label className="block text-sm font-medium text-gray-700">Email Address</label>
-                    <input
-                        type="email"
-                        name="email"
-                        value={formData.email}
-                        onChange={handleChange}
-                        className={`mt-1 block w-full p-2 border ${
-                            errors.email ? 'border-red-500' : 'border-gray-300'
-                        } rounded-md`}
-                        required
-                    />
-                    {errors.email && <p className="text-red-500 text-sm mt-1">{errors.email}</p>}
-                </div>
 
-                {/* Address */}
+                {/* Refrence */}
                 <div>
-                    <label className="block text-sm font-medium text-gray-700">Address</label>
+                    <label className="block text-sm font-medium text-gray-700">Refrence</label>
                     <input
                         type="text"
-                        name="address"
-                        value={formData.address}
+                        name="Refrence"
+                        value={formData.Refrence}
                         onChange={handleChange}
-                        className={`mt-1 block w-full p-2 border ${
-                            errors.address ? 'border-red-500' : 'border-gray-300'
-                        } rounded-md`}
+                        className={`mt-1 block w-full p-2 border ${errors.Refrence ? 'border-red-500' : 'border-gray-300'
+                            } rounded-md`}
                         required
                     />
-                    {errors.address && <p className="text-red-500 text-sm mt-1">{errors.address}</p>}
+                    {errors.Refrence && <p className="text-red-500 text-sm mt-1">{errors.Refrence}</p>}
                 </div>
 
                 {/* Deadline */}
@@ -180,9 +162,9 @@ const Form = ({cartId}) => {
                         name="deadline"
                         value={formData.deadline}
                         onChange={handleChange}
-                        className={`mt-1 block w-full p-2 border ${
-                            errors.deadline ? 'border-red-500' : 'border-gray-300'
-                        } rounded-md`}
+                        className={`mt-1 block w-full p-2 border ${errors.deadline ? 'border-red-500' : 'border-gray-300'
+                            } rounded-md`}
+                        min={new Date().toISOString().split("T")[0]}
                         required
                     />
                     {errors.deadline && <p className="text-red-500 text-sm mt-1">{errors.deadline}</p>}
@@ -190,7 +172,7 @@ const Form = ({cartId}) => {
 
                 <button
                     type="submit"
-                    className={`w-full ${currentPath==='/client/cartpage'?'bg-purple-900 hover:bg-purple-800': 'bg-gray-900 hover:bg-gray-950'}  text-white py-3 px-6 rounded-lg  transition`}
+                    className={`w-full ${currentPath === '/client/cartpage' ? 'bg-purple-900 hover:bg-purple-800' : 'bg-gray-900 hover:bg-gray-950'}  text-white py-3 px-6 rounded-lg  transition`}
                 >
                     Give to Another Person
                 </button>

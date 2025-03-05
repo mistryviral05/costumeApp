@@ -1,9 +1,7 @@
-const mongoose = require('mongoose'); // Erase if already required
+const mongoose = require('mongoose');
 
 // Declare the Schema of the Mongo model
-var userSchema = new mongoose.Schema({
-
-
+const userSchema = new mongoose.Schema({
     costumes: [
         {
             id: {
@@ -11,32 +9,47 @@ var userSchema = new mongoose.Schema({
             },
             quantity: {
                 type: Number,
-                default: 1, // Default quantity set to 1
-                min: 1, // Ensures quantity is at least 1
+                default: 1,
+                min: 0,
+            },
+            good:{
+                type:Number
+            },
+            damaged:{
+                type:Number
+            },
+            lost:{
+                type:Number
+            },
+            pending:{
+                type:Number
             },
             addedAt: {
                 type: Date,
                 default: Date.now,
-            }
+            },
+            status: {
+                type: String,
+                enum: ["not returned", "partially returned", "returned"],
+                default: "not returned",
+            },
         },
-
     ],
-
     assignedTo: {
         personname: { type: String },
-        email: { type: String },
         contact: { type: String },
-        address: { type: String },
+        Refrence: { type: String },
         deadline: {
-            type: Date
+            type: Date,
         },
     },
-
-
     date: {
         type: String,
         default: () => new Date().toISOString(),
     },
-
 });
+
+
+
+
 module.exports = mongoose.model('AssignedTo', userSchema);

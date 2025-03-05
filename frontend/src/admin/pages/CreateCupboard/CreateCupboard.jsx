@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, DoorClosed, Info, MapPin, Box, CheckCircle } from 'lucide-react';
 import { v4 as uuidv4 } from 'uuid';
-import { toast } from 'react-toastify';
+import { toast } from 'sonner';
 
 function CreateCupboard() {
     const navigate = useNavigate();
@@ -28,10 +28,7 @@ function CreateCupboard() {
             if (response.ok) {
               
                 navigate("/admin/home");  // Redirect after success
-                toast.success('Cupboard created successfully!', {
-                    position: "top-center",
-                    autoClose: 3000,
-                });
+               toast.success("Cupboard Created")
             } else {
                 throw new Error('Failed to create cupboard');
             }

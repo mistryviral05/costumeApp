@@ -58,16 +58,7 @@ const Home = () => {
 
   const deleteCupboard = (id) => {
     // setCupboards((prevCupboards) => prevCupboards.filter((c) => c.id !== id));
-    toast('Cupboard deleted', {
-      position: "top-center",
-      autoClose: 1000,
-      hideProgressBar: false,
-      closeOnClick: false,
-      pauseOnHover: true,
-      draggable: true,
-      theme: "light",
-      transition: Bounce,
-    });
+    
   };
 
   const showMore = () => {

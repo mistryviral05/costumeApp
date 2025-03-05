@@ -10,6 +10,7 @@ import DetailsCos from "./pages/Details/DetailsCos";
 import CostumeDetail from "./pages/CostumeDetail/CostumeDetail";
 import ProfilePage from "./pages/ProfilePage/ProfilePage";
 import ClientLogin from "./pages/ClientLogin/ClientLogin"
+import WashingClient from "./pages/washingClient/WashingClient";
 
 const clientRoutes = [
   {
@@ -49,6 +50,11 @@ const clientRoutes = [
       {
         path: '/client/profile',
         element: <><ClientAuthProtected><Navbar/><ProfilePage/></ClientAuthProtected></>
+      }
+      ,
+      {
+        path: '/client/clientWashing',
+        element: <><ClientAuthProtected><Navbar/><WashingClient/></ClientAuthProtected></>
       }
 ];
 
