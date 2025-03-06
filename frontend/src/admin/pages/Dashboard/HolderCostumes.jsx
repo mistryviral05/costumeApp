@@ -105,6 +105,7 @@ const HolderCostumeDetails = () => {
     const returnData = {
       holderId: params.id,
       holderName: holder.personname,
+      holderphonenumber:holder.contact,
       costumes: selectedCostumes.map(costume => ({
         id: costume.id,
         name: costume.costumename,

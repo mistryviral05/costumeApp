@@ -14,17 +14,20 @@ const lostSchema = new mongoose.Schema({
         type:Number,
         default:0,
     },
-    repairedquantity:{
+    damaged:{
         type:Number,
-        default:0,
+        default:0
     },
     cosumername:{
         type:String,
     },
+    phonenumber:{
+        type:String,
+    },
     status:{
         type:String,
-        default:"Damaged",
-        enum:["Damaged","In Repair","Repaired"],
+        default:"Lost",
+        enum:["Damaged","Lost","Restored"],
     },
     createdAt: {
         type: Date,

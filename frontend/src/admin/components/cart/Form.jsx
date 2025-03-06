@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { toast, ToastContainer, Bounce } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import useAuth from '@/hooks/useAuth';
+import useAuthAdmin from '@/hooks/useAuthAdmin';
 
 const Form = ({ cartId }) => {
     const [formData, setFormData] = useState({
@@ -15,6 +17,8 @@ const Form = ({ cartId }) => {
     const location = useLocation()
     const navigate = useNavigate()
     const currentPath = location.pathname
+    const {user}= useAuth();
+    const {admin}= useAuthAdmin()
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -57,13 +61,15 @@ const Form = ({ cartId }) => {
         if (validate()) {
             console.log('Form submitted:', formData);
             console.log(cartId)
+            console.log(admin)
+            const phonenumber = user?.phonenumber || admin?.phonenumber
             try {
                 const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/cpdetails/assignTo`, {
                     method: "POST",
                     headers: {
                         'Content-Type': 'application/json',
                     },
-                    body: JSON.stringify({ cartId: cartId, ...formData })
+                    body: JSON.stringify({ cartId: cartId, ...formData,userphonenumber:phonenumber })
                 })
                 if (res.ok) {
                     const message = await res.json();

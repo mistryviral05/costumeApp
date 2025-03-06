@@ -77,3 +77,6 @@ exports.logOut = async (req, res) => {
     }
 
 }
+exports.getAdminDetails = async(req,res)=>{
+    res.status(200).json({success:true,message:req.admin})
+}

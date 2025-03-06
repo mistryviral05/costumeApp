@@ -3,6 +3,7 @@ const router = express.Router();
 const connectDb = require('../db/connectDb')
 const detailControllers = require("../controllers/detailsController");
 const { chageStatusDamaged, fetchLogs, deleteDamagedCostumes } = require('../controllers/damage.controller');
+const { updateLostCostumeStatus } = require('../controllers/lost.controller');
 connectDb();
 router.post('/addCostume', detailControllers.addCostume);
 router.delete('/deleteCostume/:id',detailControllers.deleteCostumeById );
@@ -30,6 +31,7 @@ router.get('/getLostCostumes',detailControllers.getLostCostumes);
 router.put('/updateStatusDamged',chageStatusDamaged)
 router.delete('/deleteDamagedCostumes',deleteDamagedCostumes)
 router.get('/fetchLogs',fetchLogs)
+router.put('/updateLostCostumeStatus',updateLostCostumeStatus)
 
 
 module.exports = router;

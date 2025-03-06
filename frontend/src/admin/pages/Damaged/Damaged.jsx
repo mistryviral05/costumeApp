@@ -63,6 +63,7 @@ const Damaged = () => {
       })
       if (!res.ok) throw new Error("Failed to fetch data")
       const data = await res.json()
+    console.log(data)
       setCostumes(data.Costumes || [])
     } catch (err) {
       setError(err.message)
@@ -265,8 +266,8 @@ const Damaged = () => {
   const displayedCostumes = filteredCostumes
 
   return (
-    <div className="container mx-auto p-4 sm:p-6 max-w-7xl">
-      <Card className="w-full mx-auto shadow-md">
+    <div className="w-full px-0 py-6 max-w-none">
+      <Card className="w-full mx-auto md:shadow-md">
         <CardHeader className="bg-gray-50 px-4 py-3 sm:px-6 sm:py-4">
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
             <CardTitle className="text-lg sm:text-xl md:text-2xl font-bold flex items-center gap-2">
@@ -388,15 +389,7 @@ const Damaged = () => {
                     Restore to Inventory
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem
-                    onClick={() => {
-                      setSelectedTransferStatus("Damaged")
-                      setTransferDialogOpen(true)
-                    }}
-                  >
-                    <AlertTriangle className="mr-2 h-4 w-4" />
-                    Mark as Damaged
-                  </DropdownMenuItem>
+             
                 </DropdownMenuContent>
               </DropdownMenu>
               <Button
@@ -556,10 +549,9 @@ const Damaged = () => {
                   <SelectValue placeholder="Select status" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="Damaged">Damaged</SelectItem>
                   <SelectItem value="In Repair">In Repair</SelectItem>
                   <SelectItem value="Repaired">Repaired</SelectItem>
-                  <SelectItem value="Restored">Restored</SelectItem>
+                  
                 </SelectContent>
               </Select>
             </div>

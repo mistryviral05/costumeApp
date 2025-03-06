@@ -48,6 +48,7 @@ const Lost = () => {
   const [showCustomDateFilter, setShowCustomDateFilter] = useState(false)
   const [transferDialogOpen, setTransferDialogOpen] = useState(false)
   const [selectedTransferStatus, setSelectedTransferStatus] = useState("")
+  const [sortConfig, setSortConfig] = useState({ key: null, direction: 'ascending' })
 
   useEffect(() => {
     fetchCostumes()
@@ -61,6 +62,7 @@ const Lost = () => {
       })
       if (!res.ok) throw new Error("Failed to fetch data")
       const data = await res.json()
+
       setCostumes(data.Costumes || [])
     } catch (err) {
       setError(err.message)
@@ -80,14 +82,12 @@ const Lost = () => {
   const handleSort = (key) => {
     setSortConfig(prev => ({
       key,
-      direction: 
-        prev.key === key && prev.direction === 'ascending' 
-          ? 'descending' 
+      direction:
+        prev.key === key && prev.direction === 'ascending'
+          ? 'descending'
           : 'ascending'
     }))
   }
-
-  const [sortConfig, setSortConfig] = useState({ key: null, direction: 'ascending' })
 
   const handleSelectAll = (checked) => {
     if (checked) {
@@ -131,11 +131,17 @@ const Lost = () => {
 
   const handleTransferSubmit = async () => {
     try {
-      const costumeIds = selectedCostumes.map((id) => ({
-        id,
-        quantity: actionQuantities[id] || 1,
-      }))
+      const costumeIds = selectedCostumes.map((id) => {
+        const costume = costumes.find(c => c.id === id);
+        return {
+          id,
+          cid: costume?.cid || null,
+          cosumername:costume?.cosumername,
+          quantity: actionQuantities[id] || 1,
+        }
+      });
       const newStatus = selectedTransferStatus
+      console.log(costumeIds, newStatus)
 
       const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/cpdetails/updateLostCostumeStatus`, {
         method: "PUT",
@@ -144,7 +150,7 @@ const Lost = () => {
         },
         body: JSON.stringify({ costumeIds, newStatus })
       })
-      
+
       if (res.ok) {
         const message = await res.json()
         toast.success(message.message)
@@ -168,7 +174,8 @@ const Lost = () => {
       result = result.filter(
         (costume) =>
           (costume.costumename?.toLowerCase() || "").includes(searchTerm.toLowerCase()) ||
-          (costume.description?.toLowerCase() || "").includes(searchTerm.toLowerCase())
+          (costume.description?.toLowerCase() || "").includes(searchTerm.toLowerCase()) ||
+          (costume.phonenumber?.toLowerCase() || "").includes(searchTerm.toLowerCase())
       )
     }
 
@@ -237,18 +244,18 @@ const Lost = () => {
   const displayedCostumes = filteredCostumes
 
   return (
-    <div className="container mx-auto p-4 sm:p-6 max-w-7xl">
-      <Card className="w-full mx-auto shadow-md">
+    <div className="w-full px-0 py-6 max-w-none">
+      <Card className="w-full md:shadow-md">
         <CardHeader className="bg-gray-50 px-4 py-3 sm:px-6 sm:py-4">
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
             <CardTitle className="text-lg sm:text-xl md:text-2xl font-bold flex items-center gap-2">
               <AlertCircle className="h-5 w-5 text-red-500" />
               Lost Costumes
             </CardTitle>
-            <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
+            <div className="flex flex-wrap gap-2 w-full sm:w-auto">
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="outline" className="w-full sm:w-auto text-sm">
+                  <Button variant="outline" className="w-full sm:w-auto text-sm flex-1 sm:flex-none">
                     Status: {statusFilter} <Filter className="ml-2 h-4 w-4" />
                   </Button>
                 </DropdownMenuTrigger>
@@ -267,7 +274,7 @@ const Lost = () => {
 
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="outline" className="w-full sm:w-auto text-sm">
+                  <Button variant="outline" className="w-full sm:w-auto text-sm flex-1 sm:flex-none">
                     Date: {dateFilter} <Filter className="ml-2 h-4 w-4" />
                   </Button>
                 </DropdownMenuTrigger>
@@ -291,7 +298,7 @@ const Lost = () => {
                 variant="outline"
                 size="sm"
                 onClick={() => setShowCustomDateFilter(!showCustomDateFilter)}
-                className="w-full sm:w-auto text-sm"
+                className="w-full sm:w-auto text-sm flex-1 sm:flex-none"
               >
                 <Filter className="mr-2 h-4 w-4" />
                 {showCustomDateFilter ? "Hide Filter" : "Custom Filter"}
@@ -330,16 +337,16 @@ const Lost = () => {
           )}
 
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-4">
-            <div className="relative w-full sm:flex-1">
+            <div className="relative w-full">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
               <Input
-                placeholder="Search by name or description..."
+                placeholder="Search by name, description, or phone..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="pl-10 w-full text-sm"
               />
             </div>
-            <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
+            <div className="flex flex-wrap gap-2 w-full sm:w-auto">
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button
@@ -368,14 +375,14 @@ const Lost = () => {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead className="w-[50px]">
+                  <TableHead className="w-[40px] sm:w-[50px]">
                     <Checkbox
                       id="select-all"
                       onCheckedChange={handleSelectAll}
                       checked={selectedCostumes.length > 0 && selectedCostumes.length === filteredCostumes.length}
                     />
                   </TableHead>
-                  <TableHead className="w-[100px]">Image</TableHead>
+                  <TableHead className="w-[80px] sm:w-[100px]">Image</TableHead>
                   <TableHead className="cursor-pointer" onClick={() => handleSort('cosumername')}>
                     Consumer
                     <ArrowUpDown className="ml-2 h-4 w-4 inline" />
@@ -388,8 +395,12 @@ const Lost = () => {
                     Description
                     <ArrowUpDown className="ml-2 h-4 w-4 inline" />
                   </TableHead>
+                  <TableHead className="cursor-pointer" onClick={() => handleSort('phonenumber')}>
+                    Phone Number
+                    <ArrowUpDown className="ml-2 h-4 w-4 inline" />
+                  </TableHead>
                   <TableHead className="cursor-pointer" onClick={() => handleSort('quantity')}>
-                    Quantity
+                    Qty
                     <ArrowUpDown className="ml-2 h-4 w-4 inline" />
                   </TableHead>
                   <TableHead className="cursor-pointer" onClick={() => handleSort('received')}>
@@ -400,17 +411,21 @@ const Lost = () => {
                     Date
                     <ArrowUpDown className="ml-2 h-4 w-4 inline" />
                   </TableHead>
+                  <TableHead className="cursor-pointer" onClick={() => handleSort('damaged')}>
+                    Damaged
+                    <ArrowUpDown className="ml-2 h-4 w-4 inline" />
+                  </TableHead>
                   <TableHead className="cursor-pointer" onClick={() => handleSort('status')}>
                     Status
                     <ArrowUpDown className="ml-2 h-4 w-4 inline" />
                   </TableHead>
-                  <TableHead className="text-right">Action Qty</TableHead>
+                  <TableHead className="text-right w-[80px] sm:w-[100px]">Action Qty</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {loading ? (
                   <TableRow>
-                    <TableCell colSpan={10} className="text-center py-4">
+                    <TableCell colSpan={12} className="text-center py-4">
                       <div className="flex items-center justify-center">
                         <Loader2 className="h-6 w-6 animate-spin text-gray-500 mr-2" />
                         Loading costumes...
@@ -419,7 +434,7 @@ const Lost = () => {
                   </TableRow>
                 ) : error ? (
                   <TableRow>
-                    <TableCell colSpan={10} className="text-center py-4 text-red-500">
+                    <TableCell colSpan={12} className="text-center py-4 text-red-500">
                       Error: {error}
                     </TableCell>
                   </TableRow>
@@ -447,16 +462,18 @@ const Lost = () => {
                       <TableCell>{costume.cosumername}</TableCell>
                       <TableCell>{costume.costumename}</TableCell>
                       <TableCell>{costume.description}</TableCell>
+                      <TableCell>{costume.phonenumber}</TableCell>
                       <TableCell>{costume.quantity}</TableCell>
-                      <TableCell>{costume.received || 0}</TableCell>
+                      <TableCell>{costume.recived || 0}</TableCell>
                       <TableCell>{formatDate(costume.date)}</TableCell>
+                      <TableCell>{costume.damaged || 0}</TableCell>
                       <TableCell>
                         <Badge
                           className={`${costume.status === "Lost"
-                              ? "bg-red-100 text-red-800 hover:bg-red-100"
-                              : costume.status === "Restored"
-                                ? "bg-green-100 text-green-800 hover:bg-green-100"
-                                : "bg-orange-100 text-orange-800 hover:bg-orange-100"
+                            ? "bg-red-100 text-red-800 hover:bg-red-100"
+                            : costume.status === "Restored"
+                              ? "bg-green-100 text-green-800 hover:bg-green-100"
+                              : "bg-orange-100 text-orange-800 hover:bg-orange-100"
                             }`}
                         >
                           {costume.status}
@@ -476,7 +493,7 @@ const Lost = () => {
                   ))
                 ) : (
                   <TableRow>
-                    <TableCell colSpan={10} className="text-center py-4">
+                    <TableCell colSpan={12} className="text-center py-4">
                       No lost costumes found
                     </TableCell>
                   </TableRow>

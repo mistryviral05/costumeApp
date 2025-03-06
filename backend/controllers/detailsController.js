@@ -8,7 +8,7 @@ const AssignedTo = require('../models/AssignedTo');
 const { getIO } = require('../socket');
 const Damaged = require('../models/Damaged');
 const Lost = require('../models/Lost');
-const Log = require('../models/Logs'); 
+const Log = require('../models/Logs');
 
 
 exports.addCostume = async (req, res) => {
@@ -200,7 +200,7 @@ exports.trasferCostume = async (req, res) => {
         }
     } catch (err) {
         console.error(err);
-        
+
         await Log.create({
             timestamp: new Date(),
             level: "error",
@@ -240,24 +240,31 @@ exports.searchCostume = async (req, res) => {
 exports.addToCart = async (req, res) => {
 
 
-    const { id, ids } = req.body;
+    const { id, ids, userphonenumber } = req.body;
+    console.log(userphonenumber)
+
+    if (!userphonenumber) {
+        return res.status(400).json({ message: "Phone number is required" });
+    }
 
     if (!id && (!ids || !Array.isArray(ids) || ids.length === 0)) {
-        return res.json({ message: "No costume IDs provided" });
+        return res.status(400).json({ message: "No costume IDs provided" });
     }
 
     try {
-        let cart = await Cart.findOne();
+        let cart = await Cart.findOne({ phonenumber: userphonenumber });
+        // console.log(cart)
         if (!cart) {
-            cart = new Cart({ costumes: [] });
+            // **Agar cart exist nahi karta, naya cart banao user ke phonenumber ke saath**
+            cart = new Cart({ phonenumber: userphonenumber, costumes: [] });
         }
 
         if (id) {
             // **Single item processing**
             const costume = await Details.findOne({ id: id });
 
-            if (!costume) return res.json({ message: "Costume Not Found" });
-            if (costume.quantity <= 0) return res.json({ message: "Costume is out of stock" });
+            if (!costume) return res.status(404).json({ message: "Costume Not Found" });
+            if (costume.quantity <= 0) return res.status(400).json({ message: "Costume is out of stock" });
 
             const existingItemIndex = cart.costumes.findIndex(item => item.id === id);
 
@@ -276,10 +283,10 @@ exports.addToCart = async (req, res) => {
             // **Multiple items processing**
             const costumes = await Details.find({ id: { $in: ids } });
 
-            if (costumes.length === 0) return res.json({ message: "No valid costumes found" });
+            if (costumes.length === 0) return res.status(404).json({ message: "No valid costumes found" });
 
             for (const costume of costumes) {
-                if (costume.quantity <= 0) return res.json({ message: `Costume ${costume.id} is out of stock` });
+                if (costume.quantity <= 0) return res.status(400).json({ message: `Costume ${costume.id} is out of stock` });
 
                 const existingItemIndex = cart.costumes.findIndex(item => item.id === costume.id);
 
@@ -311,10 +318,9 @@ exports.addToCart = async (req, res) => {
         });
 
         // Emit updated cart details via Socket.IO
-        getIO().emit("CartDetails", { success: true, cartId, message: mergedCart });
+        getIO().emit("CartDetails", { success: true, cartId, message: mergedCart,userphonenumber });
 
         res.json({ success: true, message: `${id ? "1" : ids.length} costume(s) added to cart` });
-
     } catch (err) {
         console.log(err);
         res.json({ success: false, message: "Error adding costume(s) to cart" });
@@ -322,10 +328,10 @@ exports.addToCart = async (req, res) => {
 };
 exports.removeToCart = async (req, res) => {
     try {
-        const { id } = req.body;
-
+        const { id,userphonenumber } = req.body;
+       
         // Find the cart
-        let cart = await Cart.findOne();
+        let cart = await Cart.findOne({phonenumber:userphonenumber});
         if (!cart) {
             return res.json({ message: "Cart is not available" });
         }
@@ -352,7 +358,7 @@ exports.removeToCart = async (req, res) => {
 
         // Save the updated cart
         await cart.save();
-        getIO().emit("removeToCart", { success: true, message: id })
+        getIO().emit("removeToCart", { success: true,removedQuantity:removedQuantity, message: id,userphonenumber,status:"In Stock"})
         res.json({ success: true, message: "Costume removed from cart and quantity updated" });
 
 
@@ -421,9 +427,11 @@ exports.getCostumeById = async (req, res) => {
 exports.assignTo = async (req, res) => {
     try {
 
-        const { cartId, personname, contact, Refrence, deadline } = req.body;
+        const { cartId, personname, contact, Refrence, deadline,userphonenumber} = req.body;
+
         const cart = await Cart.findById(cartId)
         if (!cart) return res.status(404).json({ message: "Cart not exits" })
+
         const assignedCart = new AssignedTo({
             costumes: cart.costumes,
             assignedTo: { personname, contact, Refrence, deadline: new Date(deadline) },
@@ -432,7 +440,7 @@ exports.assignTo = async (req, res) => {
         await assignedCart.save();
 
         await Cart.findByIdAndDelete(cartId);
-        getIO().emit("GiveOther", { success: true });
+        getIO().emit("GiveOther", { success: true,userphonenumber });
         res.json({ success: true, message: "Costumes assigned with deadline" })
 
 
@@ -468,7 +476,7 @@ exports.incrementQuantity = async (req, res) => {
 
     try {
 
-        const { id, quantity } = req.body;
+        const { id, quantity,userphonenumber } = req.body;
         const costume = await Details.findOne({ id: id });
         if (!costume) {
             return res.json({ message: "Costume Not Found" });
@@ -477,7 +485,7 @@ exports.incrementQuantity = async (req, res) => {
             return res.json({ message: "Costume is out of stock" });
         }
 
-        let cart = await Cart.findOne()
+        let cart = await Cart.findOne({phonenumber:userphonenumber})
         if (!cart) {
             return res.json({ message: "cart not found" });
         }
@@ -489,7 +497,7 @@ exports.incrementQuantity = async (req, res) => {
         costume.quantity -= 1;
         await costume.save();
         await cart.save();
-        getIO().emit("incrementQuantity", { id, quantity })
+        getIO().emit("incrementQuantity", { id, quantity,userphonenumber })
         res.status(200).json({ success: true, message: "Quantity increment" });
 
 
@@ -504,7 +512,7 @@ exports.decrementQuantity = async (req, res) => {
 
     try {
 
-        const { id, quantity } = req.body;
+        const { id, quantity,userphonenumber } = req.body;
         const costume = await Details.findOne({ id: id });
         if (!costume) {
             return res.json({ message: "Costume Not Found" });
@@ -513,7 +521,7 @@ exports.decrementQuantity = async (req, res) => {
         //     return res.json({ message: "Costume is out of stock" });
         // }
 
-        let cart = await Cart.findOne()
+        let cart = await Cart.findOne({phonenumber:userphonenumber})
         if (!cart) {
             return res.json({ message: "cart not found" });
         }
@@ -528,7 +536,7 @@ exports.decrementQuantity = async (req, res) => {
         costume.quantity += 1;
         await costume.save();
         await cart.save();
-        getIO().emit("decrementQuantity", { id, quantity })
+        getIO().emit("decrementQuantity", { id, quantity,userphonenumber })
         res.status(200).json({ success: true, message: "Quantity decremented" });
 
     } catch (error) {
@@ -575,11 +583,11 @@ exports.deleteHolderDetails = async (req, res) => {
 
         // Restore costumes back to Details collection
         for (const costume of assignedHolder.costumes) {
-           
 
-           if(costume.status === "not returned" || costume.status==="partially returned"){
-            return res.status(400).json({ success: true, message: "Please first take the Costume then after delete" });
-           }
+
+            if (costume.status === "not returned" || costume.status === "partially returned") {
+                return res.status(400).json({ success: true, message: "Please first take the Costume then after delete" });
+            }
         }
 
         // Delete the assigned holder
@@ -631,7 +639,7 @@ exports.updateHolderDetails = async (req, res) => {
 
 exports.updateReturnStatus = async (req, res) => {
     try {
-        const { holderId, holderName, costumes } = req.body;
+        const { holderId, holderName, costumes,holderphonenumber } = req.body;
         if (!holderId || !Array.isArray(costumes) || costumes.length === 0) {
             return res.status(400).json({ success: false, message: "Invalid request data" });
         }
@@ -689,10 +697,14 @@ exports.updateReturnStatus = async (req, res) => {
                         id: costume.id,
                         quantity: costume.lost,
                         cosumername: holderName,
+                        phonenumber:holderphonenumber,
                     });
                 }
             }
         }
+
+
+        console.log(holderphonenumber)
 
         // ✅ Save assigned only after all updates
         await assigned.save();
@@ -738,9 +750,9 @@ exports.getDamagedCostumes = async (req, res) => {
                 id: e._id,
                 cid: e.id,
                 cosumername: e.cosumername,
-                status:e.status,
-                inrepairedquantity:e.inrepairedquantity,
-                repairedquantity:e.repairedquantity,
+                status: e.status,
+                inrepairedquantity: e.inrepairedquantity,
+                repairedquantity: e.repairedquantity,
                 fileUrl: costume.fileUrl,
                 costumename: costume.costumename,
                 catagory: costume.catagory,
@@ -750,10 +762,12 @@ exports.getDamagedCostumes = async (req, res) => {
             };
 
         }))
+        
 
         res.status(200).json({ success: true, Costumes })
     } catch (error) {
-        res.json({ success: false })
+        console.log(error)
+        res.json({ success: false,message:error })
     }
 }
 exports.getLostCostumes = async (req, res) => {
@@ -769,11 +783,15 @@ exports.getLostCostumes = async (req, res) => {
                 id: e._id,
                 cid: e.id,
                 cosumername: e.cosumername,
+                status:e.status,
                 fileUrl: costume.fileUrl,
                 costumename: costume.costumename,
                 catagory: costume.catagory,
                 description: costume.description,
+                phonenumber: e.phonenumber || 1234567890,
                 quantity: e.quantity,
+                recived:e.recived,
+                damaged:e.damaged,
                 date: e.createdAt,
             };
 

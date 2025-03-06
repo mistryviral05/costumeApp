@@ -7,8 +7,8 @@ const Signup = () => {
     name: '',
     username: '',
     email: '',
-    number: '',
     password: '',
+    phonenumber:'',
     cpassword: '',
   });
 
@@ -49,7 +49,7 @@ const Signup = () => {
           name: '',
           username:'',
           email: '',
-          number: '',
+          phonenumber: '',
           password: '',
           cpassword: '',
         }))
@@ -121,11 +121,11 @@ const Signup = () => {
               <div>
                 <label className="text-gray-800 text-sm mb-2 block">Mobile No.</label>
                 <input
-                  name="number"
+                  name="phonenumber"
                   type="number"
                   className="bg-gray-100 w-full text-gray-800 text-sm px-4 py-2.5 rounded-md border focus:bg-transparent focus:border-black outline-none transition-all"
                   placeholder="Enter mobile number"
-                  value={formData.number}
+                  value={formData.phonenumber}
                   onChange={handleChange}
                 />
               </div>

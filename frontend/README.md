@@ -63,18 +63,17 @@ This project is licensed under the MIT License.
 5. Add new items when in cart //complete
 6. Back and cart button beside each other //complete
 7. Return policy 
-    1. Lost 
-    2. Tear
-    3. Pending 
+    1. Lost  //complete
+    2. Tear //complete
+    3. Pending //complete 
 8. Validatiòn : date should be incoming dates //complete
 9. Send message to WhatsApp //complete
 10. Responsive : normal user : when click below, show below //complete
 11. Normal user : washing functionality //complete
 12. Tear : store details //complete
-13. Keep logs of transfer//complete
-14. All normal user have their own carts
+13. Keep logs of transfer//complete
+14. All normal user have their own carts//complete
 
 
 
-in sum bugs fix in damages
 

@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import useAuth from "@/hooks/useAuth";
 import { Separator } from "@/components/ui/separator";
 import {
   Dialog,
@@ -28,6 +29,8 @@ import {
 } from "@/components/ui/table";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import useAuthAdmin from "@/hooks/useAuthAdmin";
+
 
 const Cart = ({ setCartId }) => {
   const [costumes, setCostumes] = useState([]);
@@ -38,7 +41,15 @@ const Cart = ({ setCartId }) => {
   const [searchTerm, setSearchTerm] = useState("");
   const { socket } = useContext(SocketContext);
 
-  // Fetch available costumes
+  const { user } = useAuth()
+  const { admin } = useAuthAdmin()
+
+
+
+
+
+
+
 
   const fetchAvailableCostumes = async () => {
     try {
@@ -62,38 +73,48 @@ const Cart = ({ setCartId }) => {
 
   useEffect(() => {
     const handleCartDetails = async (data) => {
-      setCartId(data.cartId);
-      setCostumes(
-        Array.isArray(data.message)
-          ? data.message.map((item) => ({ ...item, quantity: item.quantity || 1 }))
-          : []
-      );
+      if ((user?.phonenumber === data.userphonenumber) || (admin?.phonenumber === data.userphonenumber)) {
+        setCartId(data.cartId);
+        setCostumes(
+          Array.isArray(data.message)
+            ? data.message.map((item) => ({ ...item, quantity: item.quantity || 1 }))
+            : []
+        );
+      }
     };
 
     const handleRemoveFromCart = async (data) => {
-      setCostumes((prevCos) => prevCos.filter((cos) => cos.id !== data.message));
+      if ((user?.phonenumber === data.userphonenumber) || (admin?.phonenumber === data.userphonenumber)) {
+        setCostumes((prevCos) => prevCos.filter((cos) => cos.id !== data.message));
+      }
     };
 
     const handleRemoveAll = (data) => {
       if (data.success) {
-        setCostumes([]);
+        if ((user?.phonenumber === data.userphonenumber) || (admin?.phonenumber === data.userphonenumber)) {
+          setCostumes([]);
+        }
       }
     };
 
     const handleIncrement = (data) => {
-      setCostumes((prevCostumes) =>
-        prevCostumes.map((item) =>
-          item.id === data.id ? { ...item, quantity: data.quantity } : item
-        )
-      );
+      if ((user?.phonenumber === data.userphonenumber) || (admin?.phonenumber === data.userphonenumber)) {
+        setCostumes((prevCostumes) =>
+          prevCostumes.map((item) =>
+            item.id === data.id ? { ...item, quantity: data.quantity } : item
+          )
+        );
+      }
     };
 
     const handleDecrement = (data) => {
-      setCostumes((prevCostumes) =>
-        prevCostumes.map((item) =>
-          item.id === data.id ? { ...item, quantity: data.quantity } : item
-        )
-      );
+      if ((user?.phonenumber === data.userphonenumber) || (admin?.phonenumber === data.userphonenumber)) {
+        setCostumes((prevCostumes) =>
+          prevCostumes.map((item) =>
+            item.id === data.id ? { ...item, quantity: data.quantity } : item
+          )
+        );
+      }
     };
 
     socket.on("CartDetails", handleCartDetails);
@@ -109,17 +130,21 @@ const Cart = ({ setCartId }) => {
       socket.off("incrementQuantity", handleIncrement);
       socket.off("decrementQuantity", handleDecrement);
     };
-  }, [socket]);
+  }, [socket, user, admin]);
+
 
   const fetchData = async () => {
     try {
+      const phonenumber = admin?.phonenumber || user?.phonenumber;
       const res = await fetch(
-        `${import.meta.env.VITE_BACKEND_URL}/cpdetails/getCartDetails`,
+        `${import.meta.env.VITE_BACKEND_URL}/clients/getCartDetails/${phonenumber}`,
         { method: "GET" }
       );
 
+
       if (res.ok) {
         const data = await res.json();
+        // console.log(data)
         setCartId(data.cartId);
         setCostumes(
           Array.isArray(data.message)
@@ -135,18 +160,19 @@ const Cart = ({ setCartId }) => {
   useEffect(() => {
     fetchData();
     fetchAvailableCostumes();
-  }, []);
+  }, [user, admin]);
 
   const handleRemove = async (id) => {
     let c = confirm("Are you sure you want to remove this item from your cart?");
     if (c) {
       try {
+        const phonenumber = admin?.phonenumber || user?.phonenumber;
         const res = await fetch(
           `${import.meta.env.VITE_BACKEND_URL}/cpdetails/removeToCart`,
           {
             method: "DELETE",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ id }),
+            body: JSON.stringify({ id: id, userphonenumber: phonenumber }),
           }
         );
 
@@ -172,12 +198,13 @@ const Cart = ({ setCartId }) => {
     if (newQuantity < 1) return;
 
     try {
+      const phonenumber = admin?.phonenumber || user?.phonenumber;
       const res = await fetch(
         `${import.meta.env.VITE_BACKEND_URL}/cpdetails/decrementQuantity`,
         {
           method: "PATCH",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ id, quantity: newQuantity }),
+          body: JSON.stringify({ id: id, quantity: newQuantity, userphonenumber: phonenumber }),
         }
       );
 
@@ -204,12 +231,13 @@ const Cart = ({ setCartId }) => {
     if (newQuantity < 1) return;
 
     try {
+      const phonenumber = admin?.phonenumber || user?.phonenumber;
       const res = await fetch(
         `${import.meta.env.VITE_BACKEND_URL}/cpdetails/incrementQuantity`,
         {
           method: "PATCH",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ id, quantity: newQuantity }),
+          body: JSON.stringify({ id: id, quantity: newQuantity, userphonenumber: phonenumber }),
         }
       );
 
@@ -226,56 +254,7 @@ const Cart = ({ setCartId }) => {
     }
   };
 
-  // const handleAddCostume = async () => {
-  //   if (!selectedCostume) {
-  //     toast.error("Please select a costume", {
-  //       position: "top-center",
-  //       autoClose: 3000,
-  //     });
-  //     return;
-  //   }
 
-  //   try {
-  //     const res = await fetch(
-  //       `${import.meta.env.VITE_BACKEND_URL}/cpdetails/addToCart`,
-  //       {
-  //         method: "POST",
-  //         headers: { "Content-Type": "application/json" },
-  //         body: JSON.stringify({
-  //           id: selectedCostume,
-  //           quantity: quantity,
-  //         }),
-  //       }
-  //     );
-
-  //     if (res.ok) {
-  //       const data = await res.json();
-  //       toast.success(data.message || "Costume added to cart!", {
-  //         position: "top-center",
-  //         autoClose: 1000,
-  //         transition: Bounce,
-  //       });
-  //       fetchData(); // Refresh cart
-  //       setIsModalOpen(false);
-  //       setSelectedCostume("");
-  //       setQuantity(1);
-  //     } else {
-  //       const error = await res.json();
-  //       toast.error(error.message || "Failed to add costume", {
-  //         position: "top-center",
-  //         autoClose: 3000,
-  //       });
-  //     }
-  //   } catch (err) {
-  //     console.log(err);
-  //     toast.error("Failed to add costume to cart", {
-  //       position: "top-center",
-  //       autoClose: 3000,
-  //     });
-  //   }
-  // };
-
-  // Filter costumes based on search term
   const filteredCostumes = availableCostumes.filter((costume) =>
     costume.costumename.toLowerCase().includes(searchTerm.toLowerCase()) ||
     costume.cpname.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -326,6 +305,7 @@ const Cart = ({ setCartId }) => {
 
     try {
       // For simplicity, we'll add costumes one by one
+      const phonenumber = admin?.phonenumber || user?.phonenumber;
       for (const costume of selectedCostumes) {
         const res = await fetch(
           `${import.meta.env.VITE_BACKEND_URL}/cpdetails/addToCart`,
@@ -335,6 +315,7 @@ const Cart = ({ setCartId }) => {
             body: JSON.stringify({
               id: costume.id,
               quantity: costume.quantity,
+              userphonenumber: phonenumber
             }),
           }
         );
@@ -379,235 +360,237 @@ const Cart = ({ setCartId }) => {
             <ShoppingCart className="w-8 h-8" />
             Your Cart
           </h1>
-          <div className="flex items-center gap-4 w-full sm:w-auto">
+          <div className="overflow-auto flex items-center gap-4 w-full sm:w-auto">
             <span className="bg-blue-100 text-blue-800 text-sm font-medium px-4 py-2 rounded-full">
               {costumes.length} {costumes.length === 1 ? "Item" : "Items"}
             </span>
-            <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
-              <DialogTrigger asChild>
-                <Button className="flex items-center gap-2 ml-auto sm:ml-0">
-                  <Plus className="w-4 h-4" />
-                  Add Costumes
-                </Button>
-              </DialogTrigger>
-              <DialogContent className="sm:max-w-4xl max-h-[90vh] overflow-hidden">
-                <DialogHeader>
-                  <DialogTitle>Add Multiple Costumes to Cart</DialogTitle>
-                  <DialogDescription>
-                    Select costumes and specify quantities to add to your cart.
-                  </DialogDescription>
-                </DialogHeader>
+            <ScrollArea>
+              <Dialog className="overflow-auto" open={isModalOpen} onOpenChange={setIsModalOpen}>
+                <DialogTrigger asChild>
+                  <Button className="flex items-center gap-2 ml-auto sm:ml-0">
+                    <Plus className="w-4 h-4" />
+                    Add Costumes
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="sm:max-w-4xl max-h-[90vh] overflow-auto">
+                  <DialogHeader>
+                    <DialogTitle>Add Multiple Costumes to Cart</DialogTitle>
+                    <DialogDescription>
+                      Select costumes and specify quantities to add to your cart.
+                    </DialogDescription>
+                  </DialogHeader>
 
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mt-4 h-[60vh]">
-                  {/* Left side - Costume selection */}
-                  <div className="lg:col-span-2 flex flex-col">
-                    <div className="flex items-center mb-2 relative">
-                      <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-                      <Input
-                        placeholder="Search costumes..."
-                        value={searchTerm}
-                        onChange={(e) => setSearchTerm(e.target.value)}
-                        className="pl-10"
-                      />
-                    </div>
+                  <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mt-4 h-[60vh]">
+                    {/* Left side - Costume selection */}
+                    <div className="lg:col-span-2 flex flex-col">
+                      <div className="flex items-center mb-2 relative">
+                        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                        <Input
+                          placeholder="Search costumes..."
+                          value={searchTerm}
+                          onChange={(e) => setSearchTerm(e.target.value)}
+                          className="pl-10"
+                        />
+                      </div>
 
-                    <Tabs defaultValue="table" className="flex-1 flex flex-col">
-                      <TabsList className="grid w-full grid-cols-2">
-                        <TabsTrigger value="table">Table View</TabsTrigger>
-                        <TabsTrigger value="card">Card View</TabsTrigger>
-                      </TabsList>
+                      <Tabs defaultValue="table" className="flex-1 flex flex-col">
+                        <TabsList className="grid w-full grid-cols-2">
+                          <TabsTrigger value="table">Table View</TabsTrigger>
+                          <TabsTrigger value="card">Card View</TabsTrigger>
+                        </TabsList>
 
-                      <TabsContent value="table" className="flex-1 overflow-hidden">
-                        <ScrollArea className="h-[calc(60vh-8rem)]">
-                          <div className="rounded-md border">
-                            <Table>
-                              <TableHeader>
-                                <TableRow>
-                                  <TableHead className="w-12"></TableHead>
-                                  <TableHead>Costume</TableHead>
-                                  <TableHead>Cupboard</TableHead>
-                                  <TableHead>Category</TableHead>
-                                </TableRow>
-                              </TableHeader>
-                              <TableBody>
-                                {filteredCostumes.length === 0 ? (
+                        <TabsContent value="table" className="flex-1 overflow-hidden">
+                          <ScrollArea className="h-[calc(60vh-8rem)]">
+                            <div className="rounded-md border">
+                              <Table>
+                                <TableHeader>
                                   <TableRow>
-                                    <TableCell colSpan={5} className="text-center py-6 text-gray-500">
-                                      No costumes found
-                                    </TableCell>
+                                    <TableHead className="w-12"></TableHead>
+                                    <TableHead>Costume</TableHead>
+                                    <TableHead>Cupboard</TableHead>
+                                    <TableHead>Category</TableHead>
                                   </TableRow>
-                                ) : (
-                                  filteredCostumes.map((costume) => (
-                                    <TableRow
-                                      key={costume.id}
-                                      className={isCostumeSelected(costume.id) ? "bg-blue-50" : ""}
-                                      onClick={() => toggleCostumeSelection(costume)}
-                                    >
-                                      <TableCell>
-                                        <Checkbox
-                                          checked={isCostumeSelected(costume.id)}
-                                          onCheckedChange={() => toggleCostumeSelection(costume)}
-                                          id={`costume-${costume.id}`}
-                                        />
+                                </TableHeader>
+                                <TableBody>
+                                  {filteredCostumes.length === 0 ? (
+                                    <TableRow>
+                                      <TableCell colSpan={5} className="text-center py-6 text-gray-500">
+                                        No costumes found
                                       </TableCell>
-                                      <TableCell className="font-medium">
-                                        <div className="flex items-center gap-3">
+                                    </TableRow>
+                                  ) : (
+                                    filteredCostumes.map((costume) => (
+                                      <TableRow
+                                        key={costume.id}
+                                        className={isCostumeSelected(costume.id) ? "bg-blue-50" : ""}
+                                        onClick={() => toggleCostumeSelection(costume)}
+                                      >
+                                        <TableCell>
+                                          <Checkbox
+                                            checked={isCostumeSelected(costume.id)}
+                                            onCheckedChange={() => toggleCostumeSelection(costume)}
+                                            id={`costume-${costume.id}`}
+                                          />
+                                        </TableCell>
+                                        <TableCell className="font-medium">
+                                          <div className="flex items-center gap-3">
+                                            {costume.fileUrl && (
+                                              <img
+                                                src={costume.fileUrl}
+                                                alt={costume.costumename}
+                                                className="w-10 h-10 rounded-md object-cover hidden sm:block"
+                                              />
+                                            )}
+                                            {costume.costumename}
+                                          </div>
+                                        </TableCell>
+                                        <TableCell>{costume.cpname}</TableCell>
+                                        <TableCell>{costume.catagory}</TableCell>
+                                      </TableRow>
+                                    ))
+                                  )}
+                                </TableBody>
+                              </Table>
+                            </div>
+                          </ScrollArea>
+                        </TabsContent>
+
+                        <TabsContent value="card" className="flex-1 overflow-hidden">
+                          <ScrollArea className="h-[calc(60vh-8rem)]">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 p-1">
+                              {filteredCostumes.length === 0 ? (
+                                <div className="col-span-full text-center py-6 text-gray-500">
+                                  No costumes found
+                                </div>
+                              ) : (
+                                filteredCostumes.map((costume) => (
+                                  <div
+                                    key={costume.id}
+                                    className={`border rounded-lg p-4 cursor-pointer ${isCostumeSelected(costume.id) ? "border-blue-500 bg-blue-50" : ""
+                                      }`}
+                                    onClick={() => toggleCostumeSelection(costume)}
+                                  >
+                                    <div className="flex items-start gap-3">
+                                      <Checkbox
+                                        checked={isCostumeSelected(costume.id)}
+                                        onCheckedChange={() => toggleCostumeSelection(costume)}
+                                        className="mt-1"
+                                      />
+                                      <div className="flex-1">
+                                        <div className="flex flex-col sm:flex-row sm:items-center gap-2 mb-2">
                                           {costume.fileUrl && (
                                             <img
                                               src={costume.fileUrl}
                                               alt={costume.costumename}
-                                              className="w-10 h-10 rounded-md object-cover hidden sm:block"
+                                              className="w-12 h-12 rounded-md object-cover"
                                             />
                                           )}
-                                          {costume.costumename}
-                                        </div>
-                                      </TableCell>
-                                      <TableCell>{costume.cpname}</TableCell>
-                                      <TableCell>{costume.catagory}</TableCell>
-                                    </TableRow>
-                                  ))
-                                )}
-                              </TableBody>
-                            </Table>
-                          </div>
-                        </ScrollArea>
-                      </TabsContent>
-
-                      <TabsContent value="card" className="flex-1 overflow-hidden">
-                        <ScrollArea className="h-[calc(60vh-8rem)]">
-                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 p-1">
-                            {filteredCostumes.length === 0 ? (
-                              <div className="col-span-full text-center py-6 text-gray-500">
-                                No costumes found
-                              </div>
-                            ) : (
-                              filteredCostumes.map((costume) => (
-                                <div
-                                  key={costume.id}
-                                  className={`border rounded-lg p-4 cursor-pointer ${isCostumeSelected(costume.id) ? "border-blue-500 bg-blue-50" : ""
-                                    }`}
-                                  onClick={() => toggleCostumeSelection(costume)}
-                                >
-                                  <div className="flex items-start gap-3">
-                                    <Checkbox
-                                      checked={isCostumeSelected(costume.id)}
-                                      onCheckedChange={() => toggleCostumeSelection(costume)}
-                                      className="mt-1"
-                                    />
-                                    <div className="flex-1">
-                                      <div className="flex flex-col sm:flex-row sm:items-center gap-2 mb-2">
-                                        {costume.fileUrl && (
-                                          <img
-                                            src={costume.fileUrl}
-                                            alt={costume.costumename}
-                                            className="w-12 h-12 rounded-md object-cover"
-                                          />
-                                        )}
-                                        <div>
-                                          <h3 className="font-medium">{costume.costumename}</h3>
-                                          <div className="text-sm text-gray-500">
-                                            <div>{costume.cpname}</div>
-                                            <div className="inline-block bg-gray-100 px-2 py-0.5 rounded-md text-xs mt-1">
-                                              {costume.catagory}
+                                          <div>
+                                            <h3 className="font-medium">{costume.costumename}</h3>
+                                            <div className="text-sm text-gray-500">
+                                              <div>{costume.cpname}</div>
+                                              <div className="inline-block bg-gray-100 px-2 py-0.5 rounded-md text-xs mt-1">
+                                                {costume.catagory}
+                                              </div>
                                             </div>
                                           </div>
                                         </div>
                                       </div>
                                     </div>
                                   </div>
+                                ))
+                              )}
+                            </div>
+                          </ScrollArea>
+                        </TabsContent>
+                      </Tabs>
+                    </div>
+
+                    {/* Right side - Selected items */}
+                    <div className="border rounded-md p-4 flex flex-col">
+                      <h3 className="font-medium mb-2 flex items-center justify-between">
+                        Selected Costumes
+                        <Badge variant="secondary">{selectedCostumes.length}</Badge>
+                      </h3>
+
+                      {selectedCostumes.length === 0 ? (
+                        <div className="text-center py-8 text-gray-500 flex-1 flex items-center justify-center">
+                          <p>No costumes selected</p>
+                        </div>
+                      ) : (
+                        <ScrollArea className="flex-1 h-[calc(60vh-12rem)]">
+                          <div className="space-y-4">
+                            {selectedCostumes.map((costume) => (
+                              <div key={costume.id} className="border-b pb-3">
+                                <div className="flex justify-between items-center">
+                                  <span className="font-medium text-sm">{costume.costumename}</span>
+                                  <button
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      removeSelectedCostume(costume.id);
+                                    }}
+                                    className="text-red-500 hover:text-red-700"
+                                  >
+                                    <DeleteIcon className="h-4 w-4" />
+                                  </button>
                                 </div>
-                              ))
-                            )}
+                                <div className="flex items-center gap-2 mt-2">
+                                  <Button
+                                    type="button"
+                                    variant="outline"
+                                    size="icon"
+                                    className="h-7 w-7"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      updateSelectedCostumeQuantity(costume.id, costume.quantity - 1);
+                                    }}
+                                  >
+                                    <Minus className="h-3 w-3" />
+                                  </Button>
+                                  <Input
+                                    type="number"
+                                    min="1"
+                                    value={costume.quantity}
+                                    onChange={(e) => updateSelectedCostumeQuantity(
+                                      costume.id,
+                                      parseInt(e.target.value) || 1
+                                    )}
+                                    className="w-16 h-7 text-center p-1"
+                                    onClick={(e) => e.stopPropagation()}
+                                  />
+                                  <Button
+                                    type="button"
+                                    variant="outline"
+                                    size="icon"
+                                    className="h-7 w-7"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      updateSelectedCostumeQuantity(costume.id, costume.quantity + 1);
+                                    }}
+                                  >
+                                    <Plus className="h-3 w-3" />
+                                  </Button>
+                                </div>
+                              </div>
+                            ))}
                           </div>
                         </ScrollArea>
-                      </TabsContent>
-                    </Tabs>
-                  </div>
+                      )}
 
-                  {/* Right side - Selected items */}
-                  <div className="border rounded-md p-4 flex flex-col">
-                    <h3 className="font-medium mb-2 flex items-center justify-between">
-                      Selected Costumes
-                      <Badge variant="secondary">{selectedCostumes.length}</Badge>
-                    </h3>
-
-                    {selectedCostumes.length === 0 ? (
-                      <div className="text-center py-8 text-gray-500 flex-1 flex items-center justify-center">
-                        <p>No costumes selected</p>
+                      <div className="mt-4 pt-2 border-t">
+                        <Button
+                          className="w-full"
+                          disabled={selectedCostumes.length === 0}
+                          onClick={handleAddMultipleCostumes}
+                        >
+                          Add Selected Costumes
+                        </Button>
                       </div>
-                    ) : (
-                      <ScrollArea className="flex-1 h-[calc(60vh-12rem)]">
-                        <div className="space-y-4">
-                          {selectedCostumes.map((costume) => (
-                            <div key={costume.id} className="border-b pb-3">
-                              <div className="flex justify-between items-center">
-                                <span className="font-medium text-sm">{costume.costumename}</span>
-                                <button
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    removeSelectedCostume(costume.id);
-                                  }}
-                                  className="text-red-500 hover:text-red-700"
-                                >
-                                  <DeleteIcon className="h-4 w-4" />
-                                </button>
-                              </div>
-                              <div className="flex items-center gap-2 mt-2">
-                                <Button
-                                  type="button"
-                                  variant="outline"
-                                  size="icon"
-                                  className="h-7 w-7"
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    updateSelectedCostumeQuantity(costume.id, costume.quantity - 1);
-                                  }}
-                                >
-                                  <Minus className="h-3 w-3" />
-                                </Button>
-                                <Input
-                                  type="number"
-                                  min="1"
-                                  value={costume.quantity}
-                                  onChange={(e) => updateSelectedCostumeQuantity(
-                                    costume.id,
-                                    parseInt(e.target.value) || 1
-                                  )}
-                                  className="w-16 h-7 text-center p-1"
-                                  onClick={(e) => e.stopPropagation()}
-                                />
-                                <Button
-                                  type="button"
-                                  variant="outline"
-                                  size="icon"
-                                  className="h-7 w-7"
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    updateSelectedCostumeQuantity(costume.id, costume.quantity + 1);
-                                  }}
-                                >
-                                  <Plus className="h-3 w-3" />
-                                </Button>
-                              </div>
-                            </div>
-                          ))}
-                        </div>
-                      </ScrollArea>
-                    )}
-
-                    <div className="mt-4 pt-2 border-t">
-                      <Button
-                        className="w-full"
-                        disabled={selectedCostumes.length === 0}
-                        onClick={handleAddMultipleCostumes}
-                      >
-                        Add Selected Costumes
-                      </Button>
                     </div>
                   </div>
-                </div>
-              </DialogContent>
-            </Dialog>
+                </DialogContent>
+              </Dialog>
+            </ScrollArea>
           </div>
         </div>
 

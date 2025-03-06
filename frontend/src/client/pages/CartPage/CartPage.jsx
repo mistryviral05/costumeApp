@@ -1,14 +1,16 @@
-import React, { useState } from 'react';
-import { Trash2, MinusCircle, PlusCircle } from 'lucide-react';
+import React, {  useState } from 'react';
 import Form from '../../../admin/components/cart/Form';
 import Item from '../../../admin/components/cart/Item'
 
 
 const CartPage = () => {
     const [cartId, setCartId] = useState(null)
+    
+   
 
     return (
         <div className=" ">
+          
             <section className="bg-white py-8 antialiased light:bg-gray-900 md:py-10">
                 <div className="mx-auto max-w-screen-xl px-4 2xl:px-0">
 

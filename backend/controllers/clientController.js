@@ -2,6 +2,8 @@
 const bcrypt = require('bcrypt');
 const Client = require('../models/Client');
 const BlackListToken = require('../models/BlackListToken');
+const Cart = require('../models/Cart');
+const Details = require('../models/Details');
 require('dotenv').config();
 
 exports.signup = async (req, res) => {
@@ -70,6 +72,13 @@ exports.login = async (req, res) => {
 
 
 }
+exports.getUserDetailsById = async(req,res)=>{
+    if(!req.user){
+        return res.status(400).json({message:"User nathi maydo"})
+    }
+     
+    res.status(200).json({success:true,message: req.user});
+}
 exports.getUserDetails = async (req, res) => {
     try {
         const userDetails = await Client.find();
@@ -108,4 +117,42 @@ exports.logOut = async (req, res) => {
     } catch (error) {
         res.json({ success: false })
     }
+}
+exports.getCartDetailsById = async(req,res)=>{
+   
+        try {
+            const {phonenumber}= req.params;
+            // console.log(phonenumber)
+            let cart = await Cart.findOne({phonenumber});
+            if (!cart || cart.costumes.length === 0) {
+                return res.json({ message: "Cart is Empty" });
+            }
+           
+            const cartId = cart._id;
+    
+            // Extract costume IDs from the cart
+            const costumeIds = cart.costumes.map(item => item.id);
+    
+            // Fetch costume details from the Details model
+            const costumeDetails = await Details.find({ id: { $in: costumeIds } });
+    
+            // Merge costume details with their respective quantities from the cart
+            const mergedCart = costumeDetails.map(costume => {
+                const cartItem = cart.costumes.find(item => item.id === costume.id);
+                return {
+                    ...costume.toObject(), // Convert Mongoose object to plain object
+                    quantity: cartItem ? cartItem.quantity : 1 // Assign quantity from cart
+                };
+            });
+    
+    
+            res.json({ success: true, cartId: cartId, message: mergedCart });
+            // res.status(200).json({success:true})
+    
+    
+        } catch (err) {
+            console.log(err);
+            res.json({ success: false, message: err });
+        }
+ 
 }

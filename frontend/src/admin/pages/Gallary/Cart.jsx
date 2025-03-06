@@ -1,9 +1,9 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import GallaryNavbar from './GallaryNavbar'
 import Form from '../../components/cart/Form';
 import Item from '../../components/cart/Item';
 
-
+import useAuthAdmin from '@/hooks/useAuthAdmin';
 
 
 
@@ -11,6 +11,10 @@ import Item from '../../components/cart/Item';
 
 const Cart = () => {
     const [cartId, setCartId] = useState(null)
+    const {admin}=useAuthAdmin();
+    
+
+
     return (
         <div>
             <GallaryNavbar />

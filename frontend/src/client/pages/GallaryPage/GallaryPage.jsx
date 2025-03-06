@@ -8,6 +8,7 @@ import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card"
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
+import useAuth from '@/hooks/useAuth';
 
 const Gallery = () => {
   const [selectedCategory, setSelectedCategory] = useState("All");
@@ -18,6 +19,7 @@ const Gallery = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCostumes, setSelectedCostumes] = useState([]);
   const navigate = useNavigate();
+  const {user}=useAuth()
 
   const { socket } = useContext(SocketContext);
 
@@ -33,15 +35,45 @@ const Gallery = () => {
     const fetchRealTimeData = (data) => {
       setCostumes((prev) => [...prev, data.newDetails]);
     };
+    const handleUpdateCartQuantity = (data)=>{
+      setCostumes((prevCostumes) =>
+        prevCostumes.map((e) => (e.id === data.message ? { ...e, quantity:e.quantity+data.removedQuantity,status:data.status } : e)),
+    )
+  }
+  const handleIncrement = (data) => {
+    
+      setCostumes((prevCostumes) =>
+        prevCostumes.map((item) =>
+          item.id === data.id ? { ...item, quantity:item.quantity-1 } : item
+        )
+      );
+    
+  }
 
+  const handleDecrement = (data) => {
+   
+      setCostumes((prevCostumes) =>
+        prevCostumes.map((item) =>
+          item.id === data.id ? { ...item, quantity: item.quantity+1 } : item
+        )
+      );
+   
+  };
+  
+  socket.on("incrementQuantity", handleIncrement);  
+  socket.on("decrementQuantity", handleDecrement);
     socket.on("deleteGallary", handleDel);
     socket.on("updateCostumeQuantity", handleUpdateQuantity);
     socket.on("addNewCostumes", fetchRealTimeData);
+    socket.on("removeToCart",handleUpdateCartQuantity)
     
     return () => {
+      socket.off("removeToCart",handleUpdateCartQuantity)
       socket.off("deleteGallary", handleDel);
       socket.off("updateCostumeQuantity", handleUpdateQuantity);
       socket.off("addNewCostumes", fetchRealTimeData);
+      socket.off("incrementQuantity", handleIncrement);
+      socket.off("decrementQuantity", handleDecrement);  
     };
   }, [socket]);
 
@@ -82,7 +114,7 @@ const Gallery = () => {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ ids: selectedCostumes }),
+        body: JSON.stringify({ ids: selectedCostumes,userphonenumber:user.phonenumber }),
       });
 
       if (res.ok) {
@@ -110,7 +142,7 @@ const Gallery = () => {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ id: id }),
+        body: JSON.stringify({ id: id,userphonenumber:user.phonenumber}),
       });
 
       if (res.ok) {

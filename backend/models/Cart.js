@@ -3,6 +3,12 @@ const mongoose = require('mongoose'); // Erase if already required
 // Declare the Schema of the Mongo model
 const userSchema = new mongoose.Schema({
 
+    phonenumber:{
+        type:String,
+        required: true,
+        unique: true,
+
+    },
 
     costumes: [
         {
@@ -11,8 +17,8 @@ const userSchema = new mongoose.Schema({
             },
             quantity: {
                 type: Number,
-                default: 1, // Default quantity set to 1
-                min: 1, // Ensures quantity is at least 1
+                default: 1, 
+                min: 1, 
             },
             addedAt: {
                 type: Date,

@@ -16,6 +16,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge"
 import CatagoryModal from "../../components/CatagoryModal"
 import GallaryNavbar from "./GallaryNavbar"
+import useAuthAdmin from "@/hooks/useAuthAdmin"
 
 const Gallery = () => {
   const navigate = useNavigate()
@@ -27,6 +28,8 @@ const Gallery = () => {
   const [sortBy, setSortBy] = useState("featured")
   const [isMobileFiltersOpen, setIsMobileFiltersOpen] = useState(true)
   const [isOpen, setIsOpen] = useState(false)
+  const { admin } = useAuthAdmin()
+  // console.log(admin.phonenumber )
 
   // New state for multiple selection
   const [selectedItems, setSelectedItems] = useState([])
@@ -43,24 +46,56 @@ const Gallery = () => {
 
     const handleUpdateQuantity = (data) => {
       setImages((prevCostumes) =>
-        prevCostumes.map((e) => (e.id === data.id ? { ...e, quantity: data.newQuantity,status:data.status } : e)),
+        prevCostumes.map((e) => (e.id === data.id ? { ...e, quantity: data.newQuantity, status: data.status } : e)),
       )
     }
 
     const fetchRealTimeData = (data) => {
       setImages((prevImages) => [...prevImages, data.newDetails])
     }
+    const handleUpdateCartQuantity = (data) => {
+      setImages((prevCostumes) =>
+        prevCostumes.map((e) => (e.id === data.message ? { ...e, quantity: e.quantity + data.removedQuantity, status: data.status } : e)),
+      )
+    }
+
+    const handleIncrement = (data) => {
+
+      setImages((prevCostumes) =>
+        prevCostumes.map((item) =>
+          item.id === data.id ? { ...item, quantity: item.quantity - 1 } : item
+        )
+      );
+
+    }
+
+    const handleDecrement = (data) => {
+
+      setImages((prevCostumes) =>
+        prevCostumes.map((item) =>
+          item.id === data.id ? { ...item, quantity: item.quantity + 1 } : item
+        )
+      );
+
+    };
+
+    socket.on("incrementQuantity", handleIncrement);
+    socket.on("decrementQuantity", handleDecrement);
 
     socket.on("deleteGallary", handleDel)
     socket.on("updateCostumeQuantity", handleUpdateQuantity)
+    socket.on("removeToCart", handleUpdateCartQuantity)
     socket.on("addNewCostumes", fetchRealTimeData)
 
     return () => {
+      socket.off("removeToCart", handleUpdateCartQuantity)
       socket.off("deleteGallary", handleDel)
       socket.off("updateCostumeQuantity", handleUpdateQuantity)
       socket.off("addNewCostumes", fetchRealTimeData)
+      socket.off("incrementQuantity", handleIncrement);
+      socket.off("decrementQuantity", handleDecrement);
     }
-  }, [socket])
+  }, [socket, admin])
 
   const [viewType, setViewType] = useState(() => {
     return localStorage.getItem("galleryViewType") || "grid"
@@ -118,7 +153,7 @@ const Gallery = () => {
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({ ids: selectedItems }), // Sending the entire array
+          body: JSON.stringify({ ids: selectedItems, userphonenumber: admin.phonenumber }), // Sending the entire array
         }
       )
 
@@ -205,7 +240,7 @@ const Gallery = () => {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ id }),
+        body: JSON.stringify({ id: id, userphonenumber: admin.phonenumber }),
       })
 
       if (res.ok) {
