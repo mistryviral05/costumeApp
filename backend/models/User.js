@@ -7,7 +7,7 @@ const UserSchema = new Schema({
     username: {type:String,require:true},
     email: {type:String,require:true},
     phonenumber:{type:String,require:true},
-    password: {type:String,require:true},
+    password: {type:String,require:true,select:false},
     date: {
         type: String,
         default: () => new Date().toISOString(), 

@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
 import CatagoryTable from "../../components/dashboardComponents/CatagoryTable";
 import MetricCard from "../../components/dashboardComponents/MetricCard";
-import HolderTable from "../../components/dashboardComponents/HolderTable";
 
 const Dashboard = () => {
 
@@ -109,7 +108,7 @@ const Dashboard = () => {
 
       <div className="grid grid-cols-1 xl:grid-cols-[1fr_2fr] gap-6 items-stretch mt-8">
         <CatagoryTable />
-        <HolderTable />
+        
       </div>
 
 

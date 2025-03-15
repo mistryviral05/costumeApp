@@ -22,6 +22,7 @@ import Profile from './pages/Profile/Profile';
 import Damaged from './pages/Damaged/Damaged';
 import Lost from './pages/Lost/Lost';
 import Logs from './pages/Logs/Logs';
+import CartsDe from './pages/Carts/CartsDe';
 
 export const getAdminRoutes =  [
   {
@@ -157,5 +158,10 @@ export const getAdminRoutes =  [
   {
     path: '/admin/allLogs',
     element: <><AuthProtected><Layout><Logs/></Layout></AuthProtected></>
+  }
+  ,
+  {
+    path: '/admin/CartsDe',
+    element: <><AuthProtected><Layout><CartsDe/></Layout></AuthProtected></>
   }
 ];

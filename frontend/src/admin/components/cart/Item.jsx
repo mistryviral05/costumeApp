@@ -46,11 +46,6 @@ const Cart = ({ setCartId }) => {
 
 
 
-
-
-
-
-
   const fetchAvailableCostumes = async () => {
     try {
       const res = await fetch(
@@ -302,42 +297,41 @@ const Cart = ({ setCartId }) => {
       });
       return;
     }
-
+    
     try {
-      // For simplicity, we'll add costumes one by one
       const phonenumber = admin?.phonenumber || user?.phonenumber;
-      for (const costume of selectedCostumes) {
-        const res = await fetch(
-          `${import.meta.env.VITE_BACKEND_URL}/cpdetails/addToCart`,
-          {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              id: costume.id,
-              quantity: costume.quantity,
-              userphonenumber: phonenumber
-            }),
-          }
-        );
-
-        if (!res.ok) {
-          const error = await res.json();
-          toast.error(`Failed to add ${costume.costumename}: ${error.message}`, {
-            position: "top-center",
-            autoClose: 3000,
-          });
-        }
-      }
-
-      toast.success(`${selectedCostumes.length} costumes added to cart!`, {
-        position: "top-center",
-        autoClose: 1000,
-        transition: Bounce,
+      const ids = selectedCostumes.map((costume) => ({
+        id: costume.id,
+        quantity: costume.quantity,
+      }));
+      
+      const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/cpdetails/addToCart`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          ids: ids,
+          userphonenumber: phonenumber,
+        }),
       });
-
-      fetchData(); // Refresh cart
-      setIsModalOpen(false);
-      setSelectedCostumes([]);
+      
+      if (res.ok) {
+        toast.success(`${selectedCostumes.length} costumes added to cart!`, {
+          position: "top-center",
+          autoClose: 1000,
+          transition: Bounce,
+        });
+        fetchData(); // Refresh cart
+        setIsModalOpen(false);
+        setSelectedCostumes([]);
+      } else {
+        const error = await res.json();
+        toast.error(`Failed to add costumes: ${error.message}`, {
+          position: "top-center",
+          autoClose: 3000,
+        });
+      }
     } catch (err) {
       console.log(err);
       toast.error("Failed to add costumes to cart", {

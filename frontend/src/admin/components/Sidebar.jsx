@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react'; // Added useRef
 import { useNavigate, useLocation } from 'react-router-dom';
 import { 
   DoorClosed, 
@@ -12,27 +12,22 @@ import {
   Plus,
   LogOut,
   User,
-  Key,
   WashingMachine,
-  Settings,
   ChevronDown,
-  AlertCircle,        // Added for Missing
-  Scissors,          // Added for Tear
-  Clock,            // Added for Pending
-  History,          // Added for Logs
-  MessageSquare,     // Added for WhatsApp
-  Wrench,
+  AlertCircle,
   PackageX,
-  Logs
+  Logs,
+  ShoppingCart
 } from 'lucide-react';
+import useAuthAdmin from '@/hooks/useAuthAdmin';
 
-const Sidebar = ({ isOpen, setIsOpen,width }) => {
+const Sidebar = ({ isOpen, setIsOpen, width }) => {
   const navigate = useNavigate();
   const location = useLocation();
   const [showProfileMenu, setShowProfileMenu] = useState(false);
   const [activeCategory, setActiveCategory] = useState(null);
-
-  // Organize menu items by categories with improved icons
+  const profileRef = useRef(null); // Added ref for click outside
+  const {admin}= useAuthAdmin()
   const menuCategories = [
     {
       id: 'main',
@@ -48,7 +43,8 @@ const Sidebar = ({ isOpen, setIsOpen,width }) => {
       items: [
         { title: 'Users', icon: <Users size={20} />, path: '/admin/users' },
         { title: 'Add New User', icon: <UserPlus size={20} />, path: '/admin/users/new' },
-        { title: 'Add New Costume', icon: <Shirt size={20} />, path: '/admin/addNewCostume' }, // Changed Plus to Shirt
+        { title: 'Add New Costume', icon: <Shirt size={20} />, path: '/admin/addNewCostume' },
+        { title: 'Carts', icon: <ShoppingCart size={20} />, path: '/admin/CartsDe' },
       ]
     },
     {
@@ -63,21 +59,33 @@ const Sidebar = ({ isOpen, setIsOpen,width }) => {
       id: 'returnPolicy',
       title: 'Return Policy',
       items: [
-        { title: 'Lost', icon: <AlertCircle size={20} />, path: '/admin/return-policy/Lost' }, // Changed LogOut to AlertCircle
-        { title: 'Damaged', icon: <PackageX size={20} />, path: '/admin/return-policy/Damaged' },         // Changed LogOut to Scissors
-         // Changed LogOut to Clock
+        { title: 'Lost', icon: <AlertCircle size={20} />, path: '/admin/return-policy/Lost' },
+        { title: 'Damaged', icon: <PackageX size={20} />, path: '/admin/return-policy/Damaged' },
       ]
     },
     {
       id: 'logs',
       title: 'Logs & History',
       items: [
-        { title: 'All logs', icon: <Logs size={20} />, path: '/admin/allLogs' },   // Changed Key to History
+        { title: 'All logs', icon: <Logs size={20} />, path: '/admin/allLogs' },
       ]
     }
   ];
 
-  // Check which category contains the current path
+  // Handle click outside to close profile menu
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (profileRef.current && !profileRef.current.contains(event.target)) {
+        setShowProfileMenu(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
+
   useEffect(() => {
     for (const category of menuCategories) {
       if (category.items.some(item => item.path === location.pathname)) {
@@ -101,17 +109,8 @@ const Sidebar = ({ isOpen, setIsOpen,width }) => {
       title: 'Your Profile', 
       icon: <User size={16} />,
       onClick: () => navigate('/admin/profile')
-    },
-    { 
-      title: 'Change Password', 
-      icon: <Key size={16} />,
-      onClick: () => navigate('/admin/change-password')
-    },
-    { 
-      title: 'Settings', 
-      icon: <Settings size={16} />,
-      onClick: () => navigate('/admin/settings')
     }
+    // Removed 'Change Password' and 'Settings' options
   ];
 
   const toggleCategory = (categoryId) => {
@@ -125,7 +124,6 @@ const Sidebar = ({ isOpen, setIsOpen,width }) => {
         ${isOpen ? 'w-56' : 'w-16'} 
         ${isOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}`}
     >
-      {/* Header */}
       <div className="flex items-center justify-between p-4 border-b border-gray-700">
         {isOpen && (
           <h1 className="text-xl font-bold bg-gradient-to-r from-purple-400 to-pink-500 bg-clip-text text-transparent">
@@ -140,7 +138,6 @@ const Sidebar = ({ isOpen, setIsOpen,width }) => {
         </button>
       </div>
 
-      {/* Navigation */}
       <nav className="flex-1 overflow-y-auto py-4 px-3 scrollbar-thin scrollbar-thumb-gray-700 scrollbar-track-gray-900">
         {menuCategories.map((category) => (
           <div key={category.id} className="mb-4">
@@ -184,9 +181,7 @@ const Sidebar = ({ isOpen, setIsOpen,width }) => {
         ))}
       </nav>
 
-      {/* Footer - Profile & Logout */}
       <div className="p-3 border-t border-gray-800">
-        {/* Logout Button */}
         <button
           onClick={handleLogout}
           className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-red-400 hover:bg-red-500/10 transition-colors mb-3"
@@ -195,8 +190,7 @@ const Sidebar = ({ isOpen, setIsOpen,width }) => {
           {isOpen && <span className="text-sm font-medium">Logout</span>}
         </button>
         
-        {/* Profile Section */}
-        <div className="relative">
+        <div className="relative" ref={profileRef}>
           <button
             onClick={() => setShowProfileMenu(!showProfileMenu)}
             className={`w-full flex items-center gap-3 p-2 rounded-lg hover:bg-gray-800 transition-colors
@@ -207,13 +201,12 @@ const Sidebar = ({ isOpen, setIsOpen,width }) => {
             </div>
             {isOpen && (
               <div className="truncate">
-                <p className="text-sm font-medium truncate">Admin User</p>
-                <p className="text-xs text-gray-400 truncate">admin@example.com</p>
+                <p className="text-sm font-medium text-left truncate">{admin?.name}</p>
+                <p className="text-xs text-gray-400 truncate">{admin?.email}</p>
               </div>
             )}
           </button>
 
-          {/* Profile Popup Menu */}
           {showProfileMenu && (
             <div className="absolute bottom-full left-0 mb-2 w-48 bg-gray-800 rounded-lg shadow-lg py-2 border border-gray-700 z-10">
               {profileOptions.map((option, index) => (

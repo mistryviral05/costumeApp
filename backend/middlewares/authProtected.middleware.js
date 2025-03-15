@@ -41,9 +41,6 @@ module.exports.authProtectedAdmin = async(req, res, next) => {
 
     // const isBlacklisted = await BlackListToken.findOne({ token: token });
     
-
-
-
     // if (isBlacklisted) {
     //     return res.status(401).json({ message: 'Unauthorized' });
     // }

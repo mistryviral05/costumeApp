@@ -106,13 +106,23 @@ exports.getCostumeByCostumeId = async (req, res) => {
 exports.getCostumeCount = async (req, res) => {
 
     try {
-        const count = await Details.countDocuments();
-
-        res.json({ success: true, message: { count: count } })
-
+        const result = await Details.aggregate([
+            {
+                $group: {
+                    _id: null,
+                    totalQuantity: { $sum: "$quantity" } // Summing up all quantities
+                }
+            }
+        ]);
+    
+        const totalQuantity = result.length > 0 ? result[0].totalQuantity : 0;
+    
+        res.json({ success: true, message: { count:totalQuantity } });
+    
     } catch (err) {
-        res.json({ success: false, message: "error in controller" })
+        res.json({ success: false, message: "error in controller" });
     }
+    
 
 }
 exports.getCostume = async (req, res) => {
@@ -236,7 +246,6 @@ exports.searchCostume = async (req, res) => {
 
 
 }
-
 exports.addToCart = async (req, res) => {
 
 
@@ -280,27 +289,33 @@ exports.addToCart = async (req, res) => {
         }
 
         if (ids) {
-            // **Multiple items processing**
-            const costumes = await Details.find({ id: { $in: ids } });
-
+            const costumeIds = ids.map(item => item.id); // Extract all IDs from the request
+            const costumes = await Details.find({ id: { $in: costumeIds } });
+        
             if (costumes.length === 0) return res.status(404).json({ message: "No valid costumes found" });
-
-            for (const costume of costumes) {
-                if (costume.quantity <= 0) return res.status(400).json({ message: `Costume ${costume.id} is out of stock` });
-
-                const existingItemIndex = cart.costumes.findIndex(item => item.id === costume.id);
-
+        
+            for (const item of ids) {
+                const costume = costumes.find(c => c.id === item.id);
+                if (!costume) continue; // Skip invalid IDs
+        
+                if (costume.quantity < item.quantity) 
+                    return res.status(400).json({ message: `Costume ${costume.id} does not have enough stock` });
+        
+                const existingItemIndex = cart.costumes.findIndex(cartItem => cartItem.id === costume.id);
+        
                 if (existingItemIndex !== -1) {
-                    cart.costumes[existingItemIndex].quantity += 1;
+                    cart.costumes[existingItemIndex].quantity += item.quantity;
                 } else {
-                    cart.costumes.push({ id: costume.id, quantity: 1 });
+                    cart.costumes.push({ id: costume.id, quantity: item.quantity });
                 }
-                costume.quantity -= 1;
+        
+                costume.quantity -= item.quantity;
                 await costume.save();
-
-                getIO().emit("updateCostumeQuantity", { id: costume.id, newQuantity: costume.quantity });
+        
+                getIO().emit("updateCostumeQuantity", { id: costume.id, newQuantity: costume.quantity,status: costume.status });
             }
         }
+        
 
         await cart.save();
 
@@ -471,7 +486,6 @@ exports.getHolders = async (req, res) => {
     }
 
 }
-
 exports.incrementQuantity = async (req, res) => {
 
     try {
@@ -545,8 +559,6 @@ exports.decrementQuantity = async (req, res) => {
     }
 
 }
-
-
 exports.getAssignedDetailsById = async (req, res) => {
     try {
         const { id } = req.params;

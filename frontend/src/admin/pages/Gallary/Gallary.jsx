@@ -29,18 +29,15 @@ const Gallery = () => {
   const [isMobileFiltersOpen, setIsMobileFiltersOpen] = useState(true)
   const [isOpen, setIsOpen] = useState(false)
   const { admin } = useAuthAdmin()
-  // console.log(admin.phonenumber )
-
-  // New state for multiple selection
   const [selectedItems, setSelectedItems] = useState([])
   const [isSelectMode, setIsSelectMode] = useState(false)
-
+  const [showQuantityModal, setShowQuantityModal] = useState(false)
+  const [selectedQuantities, setSelectedQuantities] = useState({})
   const { socket } = useContext(SocketContext)
 
   useEffect(() => {
     const handleDel = async (data) => {
       setImages((prevImages) => prevImages.filter((image) => image.id !== data.message))
-      // Clear selection if deleted item was selected
       setSelectedItems((prev) => prev.filter((id) => id !== data.message))
     }
 
@@ -53,6 +50,7 @@ const Gallery = () => {
     const fetchRealTimeData = (data) => {
       setImages((prevImages) => [...prevImages, data.newDetails])
     }
+
     const handleUpdateCartQuantity = (data) => {
       setImages((prevCostumes) =>
         prevCostumes.map((e) => (e.id === data.message ? { ...e, quantity: e.quantity + data.removedQuantity, status: data.status } : e)),
@@ -60,28 +58,23 @@ const Gallery = () => {
     }
 
     const handleIncrement = (data) => {
-
       setImages((prevCostumes) =>
         prevCostumes.map((item) =>
           item.id === data.id ? { ...item, quantity: item.quantity - 1 } : item
         )
-      );
-
+      )
     }
 
     const handleDecrement = (data) => {
-
       setImages((prevCostumes) =>
         prevCostumes.map((item) =>
           item.id === data.id ? { ...item, quantity: item.quantity + 1 } : item
         )
-      );
+      )
+    }
 
-    };
-
-    socket.on("incrementQuantity", handleIncrement);
-    socket.on("decrementQuantity", handleDecrement);
-
+    socket.on("incrementQuantity", handleIncrement)
+    socket.on("decrementQuantity", handleDecrement)
     socket.on("deleteGallary", handleDel)
     socket.on("updateCostumeQuantity", handleUpdateQuantity)
     socket.on("removeToCart", handleUpdateCartQuantity)
@@ -92,8 +85,8 @@ const Gallery = () => {
       socket.off("deleteGallary", handleDel)
       socket.off("updateCostumeQuantity", handleUpdateQuantity)
       socket.off("addNewCostumes", fetchRealTimeData)
-      socket.off("incrementQuantity", handleIncrement);
-      socket.off("decrementQuantity", handleDecrement);
+      socket.off("incrementQuantity", handleIncrement)
+      socket.off("decrementQuantity", handleDecrement)
     }
   }, [socket, admin])
 
@@ -101,16 +94,13 @@ const Gallery = () => {
     return localStorage.getItem("galleryViewType") || "grid"
   })
 
-  // Update localStorage when view type changes
   const handleViewTypeChange = (newViewType) => {
     setViewType(newViewType)
     localStorage.setItem("galleryViewType", newViewType)
   }
 
-  // Handle item selection
   const toggleItemSelection = (id, e) => {
     e?.stopPropagation()
-
     if (selectedItems.includes(id)) {
       setSelectedItems(selectedItems.filter((itemId) => itemId !== id))
     } else {
@@ -118,7 +108,6 @@ const Gallery = () => {
     }
   }
 
-  // Toggle select mode
   const toggleSelectMode = () => {
     setIsSelectMode(!isSelectMode)
     if (isSelectMode) {
@@ -126,7 +115,6 @@ const Gallery = () => {
     }
   }
 
-  // Select all items
   const selectAllItems = () => {
     if (selectedItems.length === sortedImages.length) {
       setSelectedItems([])
@@ -135,8 +123,19 @@ const Gallery = () => {
     }
   }
 
-  // Add multiple items to cart
-  const addSelectedToCart = async () => {
+  const handleQuantityChange = (id, newQuantity) => {
+    const costume = images.find((img) => img.id === id)
+    const maxQuantity = costume.quantity
+    
+    const validatedQuantity = Math.max(1, Math.min(newQuantity, maxQuantity))
+    
+    setSelectedQuantities((prev) => ({
+      ...prev,
+      [id]: validatedQuantity,
+    }))
+  }
+
+  const addSelectedToCart = () => {
     if (selectedItems.length === 0) {
       toast.info("No items selected", {
         position: "top-center",
@@ -145,7 +144,22 @@ const Gallery = () => {
       return
     }
 
+    const initialQuantities = selectedItems.reduce((acc, id) => ({
+      ...acc,
+      [id]: 1,
+    }), {})
+    
+    setSelectedQuantities(initialQuantities)
+    setShowQuantityModal(true)
+  }
+
+  const handleSubmitWithQuantities = async () => {
     try {
+      const idsWithQuantities = selectedItems.map((id) => ({
+        id,
+        quantity: selectedQuantities[id] || 1,
+      }))
+
       const response = await fetch(
         `${import.meta.env.VITE_BACKEND_URL}/cpdetails/addToCart`,
         {
@@ -153,23 +167,31 @@ const Gallery = () => {
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({ ids: selectedItems, userphonenumber: admin.phonenumber }), // Sending the entire array
+          body: JSON.stringify({
+            ids: idsWithQuantities,
+            userphonenumber: admin.phonenumber,
+          }),
         }
       )
 
       if (response.ok) {
-        toast.success(`${selectedItems.length} items added to cart`, {
-          position: "top-center",
-          autoClose: 1000,
-          hideProgressBar: false,
-          closeOnClick: false,
-          pauseOnHover: true,
-          draggable: true,
-          theme: "light",
-          transition: Bounce,
-        })
+        const message = await response.json()
+        toast.success(
+          message.message || `${selectedItems.length} items added to cart`,
+          {
+            position: "top-center",
+            autoClose: 1000,
+            hideProgressBar: false,
+            closeOnClick: false,
+            pauseOnHover: true,
+            draggable: true,
+            theme: "light",
+            transition: Bounce,
+          }
+        )
         setSelectedItems([])
         setIsSelectMode(false)
+        setShowQuantityModal(false)
       } else {
         throw new Error("Failed to add items")
       }
@@ -182,8 +204,6 @@ const Gallery = () => {
     }
   }
 
-
-  // Delete multiple items
   const deleteSelectedItems = async () => {
     if (selectedItems.length === 0) {
       toast.info("No items selected", {
@@ -220,7 +240,6 @@ const Gallery = () => {
           theme: "light",
           transition: Bounce,
         })
-        // Socket will handle the removal from the UI
         setSelectedItems([])
         setIsSelectMode(false)
       }
@@ -438,7 +457,6 @@ const Gallery = () => {
                 <Badge variant={image.status === "In Stock" ? "outline" : "destructive"} className="ml-auto">
                   {image.status}
                 </Badge>
-
               </TableCell>
               <TableCell>
                 <div className="flex items-center gap-2">
@@ -489,8 +507,7 @@ const Gallery = () => {
       {sortedImages.map((image, index) => (
         <Card
           key={index}
-          className={`overflow-hidden cursor-pointer transition-all hover:shadow-md ${selectedItems.includes(image.id) ? "ring-2 ring-primary" : ""
-            }`}
+          className={`overflow-hidden cursor-pointer transition-all hover:shadow-md ${selectedItems.includes(image.id) ? "ring-2 ring-primary" : ""}`}
           onClick={() => (isSelectMode ? toggleItemSelection(image.id) : navigate(`/admin/costumeDetails/${image.id}`))}
         >
           <div className="relative">
@@ -503,7 +520,6 @@ const Gallery = () => {
                 />
               </div>
             )}
-
             <div className="relative pb-[100%]">
               <img
                 src={`${image.fileUrl}?auto=format&fit=crop&w=400&q=80`}
@@ -524,7 +540,6 @@ const Gallery = () => {
               <Badge variant={image.status === "In Stock" ? "outline" : "destructive"} className="ml-auto">
                 {image.status}
               </Badge>
-
             </div>
           </CardContent>
 
@@ -587,15 +602,82 @@ const Gallery = () => {
         theme="light"
       />
 
+      {showQuantityModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-background rounded-lg shadow-lg max-w-md w-full max-h-[80vh] overflow-y-auto">
+            <div className="p-4 border-b">
+              <h2 className="text-xl font-semibold">Select Quantities</h2>
+            </div>
+
+            <div className="p-4 space-y-4">
+              {selectedItems.map((id) => {
+                const costume = images.find((c) => c.id === id)
+                return (
+                  <div key={id} className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <img
+                        src={costume.fileUrl || "/placeholder.svg"}
+                        alt={costume.costumename}
+                        className="w-12 h-12 object-cover rounded"
+                      />
+                      <div>
+                        <p className="font-medium">{costume.costumename}</p>
+                        <p className="text-sm text-muted-foreground">
+                          Available: {costume.quantity}
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center">
+                      <Button
+                        variant="outline"
+                        size="icon"
+                        onClick={() => handleQuantityChange(id, (selectedQuantities[id] || 1) - 1)}
+                        disabled={(selectedQuantities[id] || 1) <= 1}
+                      >
+                        -
+                      </Button>
+                      <Input
+                        type="number"
+                        min="1"
+                        max={costume.quantity}
+                        value={selectedQuantities[id] || 1}
+                        onChange={(e) => handleQuantityChange(id, Number.parseInt(e.target.value) || 1)}
+                        className="w-16 mx-2 text-center"
+                      />
+                      <Button
+                        variant="outline"
+                        size="icon"
+                        onClick={() => handleQuantityChange(id, (selectedQuantities[id] || 1) + 1)}
+                        disabled={(selectedQuantities[id] || 1) >= costume.quantity}
+                      >
+                        +
+                      </Button>
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+
+            <div className="p-4 border-t flex justify-end gap-2">
+              <Button variant="outline" onClick={() => setShowQuantityModal(false)}>
+                Cancel
+              </Button>
+              <Button onClick={handleSubmitWithQuantities}>
+                Add to Cart
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {isOpen && (
         <CatagoryModal onClose={() => setIsOpen(false)} setCategories={setCategories} categories={categories} />
       )}
 
       <div className="min-h-screen bg-gray-50">
-        {/* Top Navigation Bar */}
         <GallaryNavbar toggalMobileFilter={() => setIsMobileFiltersOpen(!isMobileFiltersOpen)} />
 
-        {/* Mobile Filters Drawer */}
         {!isMobileFiltersOpen && (
           <div className="fixed inset-0 bg-black bg-opacity-50 z-40 sm:hidden">
             <div className="absolute right-0 top-0 h-full w-64 bg-white p-4 shadow-lg">
@@ -618,7 +700,6 @@ const Gallery = () => {
         )}
 
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6">
-          {/* Selection Actions Bar - Appears when in select mode */}
           {isSelectMode && (
             <div className="bg-white border rounded-lg p-2 mb-4 flex items-center justify-between shadow-sm">
               <div className="flex items-center gap-2">
@@ -652,7 +733,6 @@ const Gallery = () => {
             </div>
           )}
 
-          {/* Search and Filters Section */}
           <div className="mb-6 sm:mb-8 space-y-4">
             <div className="flex gap-2">
               <div className="relative flex-1">
@@ -677,7 +757,6 @@ const Gallery = () => {
               </Button>
             </div>
 
-            {/* Filters and Sort */}
             <div className="flex flex-col sm:flex-row justify-between gap-4">
               <div className="hidden sm:flex items-center gap-2 flex-wrap">
                 <Filter className="w-4 h-4 text-gray-600 mr-1" />
@@ -722,12 +801,10 @@ const Gallery = () => {
             </div>
           </div>
 
-          {/* Results Count */}
           <div className="mb-4 text-sm text-muted-foreground">
             Showing {sortedImages.length} results in {selectedCategory}
           </div>
 
-          {/* Content View */}
           {viewType === "grid" ? <GridView /> : <TableView />}
         </div>
       </div>
@@ -736,4 +813,3 @@ const Gallery = () => {
 }
 
 export default Gallery
-

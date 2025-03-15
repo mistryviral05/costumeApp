@@ -11,6 +11,7 @@ import CostumeDetail from "./pages/CostumeDetail/CostumeDetail";
 import ProfilePage from "./pages/ProfilePage/ProfilePage";
 import ClientLogin from "./pages/ClientLogin/ClientLogin"
 import WashingClient from "./pages/washingClient/WashingClient";
+import ForgotPass from "./pages/ForgotPass/ForgotPass";
 
 const clientRoutes = [
   {
@@ -55,6 +56,11 @@ const clientRoutes = [
       {
         path: '/client/clientWashing',
         element: <><ClientAuthProtected><Navbar/><WashingClient/></ClientAuthProtected></>
+      }
+      ,
+      {
+        path: '/forgotPass',
+        element: <><ForgotPass/></>
       }
 ];
 

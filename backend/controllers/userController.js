@@ -1,6 +1,8 @@
 const User = require('../models/User');
 const bcrypt = require('bcrypt');
 require('dotenv').config();
+
+
 exports.signup = async (req, res) => {
     try {
         const data = req.body;
@@ -43,7 +45,7 @@ exports.login = async (req, res) => {
     try {
 
 
-        const isUsername = await User.findOne({ username: username });
+        const isUsername = await User.findOne({ username: username }).select('+password');
         if (!isUsername) {
             return res.status(400).json({ succes: false, error: "Username or password invalid" });
         }

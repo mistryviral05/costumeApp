@@ -60,11 +60,17 @@ exports.chageStatusDamaged = async (req, res) => {
                     },
                     { new: true }
                 );
-                await Details.findOneAndUpdate(
-                    { id: e.cid }, // Ensure you're using the correct field
-                    { $inc: { quantity: e.quantity } },
-                    { new: true }
-                );
+                const detailsBulkOps = costumeIds.map((e) => ({
+                    updateOne: {
+                        filter: { id: e.cid }, // Ensure this is the correct field in Details
+                        update: { $inc: { quantity: e.quantity } }
+                    }
+                }));
+                
+                if (detailsBulkOps.length > 0) {
+                    await Details.bulkWrite(detailsBulkOps);
+                }
+                
 
                 // Create a log entry
                 logs.push({

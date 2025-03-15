@@ -95,10 +95,10 @@ exports.markAsClean = async (req, res) => {
 
             // ✅ Restore only the remaining uncleaned quantity in Details
             if (remainingQuantity > 0) {
-                await Details.findOneAndUpdate(
+                await Details.updateOne(
                     { id: item.id },
                     { $inc: { quantity: remainingQuantity } }, // ✅ Add back only uncleaned quantity
-                    { new: true, runValidators: true }
+                  
                 );
             }
         }
@@ -193,10 +193,10 @@ exports.partialClean = async (req, res) => {
         await washRecord.save();
 
         // ✅ Restore quantity in Details collection
-        await Details.findOneAndUpdate(
+        await Details.updateOne(
             { id: costumeId },
             { $inc: { quantity: cleanedQuantity } }, // Add back the cleaned quantity
-            { new: true }
+           
         );
 
         res.status(200).json({ success: true, message: "Partial clean recorded successfully", washRecord });

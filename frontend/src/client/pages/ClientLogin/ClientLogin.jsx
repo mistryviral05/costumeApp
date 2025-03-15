@@ -182,7 +182,7 @@ function App() {
             {/* Forgot password link */}
             <div className="flex items-center justify-end">
               <div className="text-sm">
-                <NavLink href="#" className="font-medium text-purple-600 hover:text-purple-500 transition-colors">
+                <NavLink to={'/forgotPass'} className="font-medium text-purple-600 hover:text-purple-500 transition-colors">
                   Forgot your password?
                 </NavLink>
               </div>

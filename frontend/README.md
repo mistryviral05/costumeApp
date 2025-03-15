@@ -76,4 +76,11 @@ This project is licensed under the MIT License.
 
 
 
-
+## My changes in the app
+- add multiple add in cart using multiselete //complete in user 
+- change password functionality to admin and users //complete in user
+- multi transfer data from one cupboard to another cupboard
+- show who give costume to person add new column 
+- if i call user than not come password only change password and only login then password come there rest apis//complete
+- show status in the gallary of users//complete
+- update the update functionality costume
