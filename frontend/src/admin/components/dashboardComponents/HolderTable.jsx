@@ -38,7 +38,11 @@ const HolderTable = () => {
 
   const handleEdit = (holder) => {
     setEditHolderId(holder.id);
-    setNewHolderData(holder);
+    // Store the contact and deadline values from the assignedTo object
+    setNewHolderData({
+      contact: holder.assignedTo.contact,
+      deadline: holder.assignedTo.deadline
+    });
   };
 
   const handleSave = async(id) => {
@@ -213,16 +217,17 @@ const HolderTable = () => {
                 {editHolderId === holder.id ? (
                   <>
                     <td className="py-2">
-                      <td className="py-2">{holder.assignedTo.personname}</td>
+                      {holder.assignedTo.personname}
                     </td>
                     <td className="py-2">
-                      <td className="py-2">{holder.assignedTo.Refrence}</td>
+                      {holder.assignedTo.Refrence}
                     </td>
                     <td className="py-2">
                       <input
                         type="text"
-                        value={newHolderData.contact}
+                        value={newHolderData.contact || ""}
                         placeholder="Enter ten digit number"
+                        onClick={(e) => e.stopPropagation()}
                         onChange={(e) => {
                           e.stopPropagation();
                           setNewHolderData({ ...newHolderData, contact: e.target.value })
@@ -233,7 +238,8 @@ const HolderTable = () => {
                     <td className="py-2">
                       <input
                         type="date"
-                        value={newHolderData.deadline}
+                        value={newHolderData.deadline || ""}
+                        onClick={(e) => e.stopPropagation()}
                         onChange={(e) => {
                           e.stopPropagation();
                           setNewHolderData({ ...newHolderData, deadline: e.target.value })

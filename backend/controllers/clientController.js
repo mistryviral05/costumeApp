@@ -203,6 +203,7 @@ exports.forgotPass = async (req, res) => {
 
     try {
 
+        
         if (!email) {
             res.status(400).json({ message: "Email required" })
         }

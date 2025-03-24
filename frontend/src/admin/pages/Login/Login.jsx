@@ -59,12 +59,12 @@ const Login = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
+  
     if (!validateForm()) return;
-
+  
     setErrors({ ...errors, server: '' });
     setIsLoading(true);
-
+  
     try {
       const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/users/login`, {
         method: 'POST',
@@ -74,16 +74,17 @@ const Login = () => {
         credentials: 'include',
         body: JSON.stringify(formData),
       });
-
+  
       const message = await response.json();
-
+  
       if (response.ok) {
         setTimeout(() => {
-          localStorage.setItem('token', message.token);
           if (message.token) {
+            const expiryTime = Date.now() + 24 * 60 * 60 * 1000; // 1 day in milliseconds
+            localStorage.setItem('token', JSON.stringify({ token: message.token, expiry: expiryTime }));
             navigate('/admin/dashboard');
           }
-        }, 5000);
+        }, 2000);
       } else {
         throw new Error(message.error || "Invalid username or password");
       }
@@ -96,6 +97,7 @@ const Login = () => {
       setIsLoading(false);
     }
   };
+  
 
   const togglePasswordVisibility = () => {
     setShowPassword(!showPassword);

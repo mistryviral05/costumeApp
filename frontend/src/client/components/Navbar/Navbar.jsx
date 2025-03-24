@@ -63,8 +63,9 @@ const Navbar = () => {
 
   const handleLogout = async () => {
     let logout = false;
-    const clientToken = localStorage.getItem('clientToken');
-
+    const token = JSON.parse(localStorage.getItem('clientToken'));
+    const clientToken = token.token;
+  console.log(clientToken)
     if (clientToken) {
       const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/clients/logout`, {
         method: "POST",

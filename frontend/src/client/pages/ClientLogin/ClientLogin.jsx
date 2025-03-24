@@ -40,10 +40,10 @@ function App() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setServerError("");
-
+  
     if (validateForm()) {
       setIsLoading(true);
-      
+  
       try {
         const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/clients/login`, {
           method: "POST",
@@ -52,22 +52,24 @@ function App() {
           },
           body: JSON.stringify({ email, password }),
         });
-
+  
         const data = await res.json();
-
+  
         if (!res.ok) {
           throw new Error(data.error || "Something went wrong");
         }
-
+  
         if (data.clientToken) {
-          localStorage.setItem("clientToken", data.clientToken);
-          
+          // Set token expiration time (1 day)
+          const expiryTime = Date.now() + 24 * 60 * 60 * 1000; // 24 hours in milliseconds
+          localStorage.setItem("clientToken", JSON.stringify({ token: data.clientToken, expiry: expiryTime }));
+  
           // Add 5 second timeout before navigating
           setTimeout(() => {
             navigate("/client/homepage");
             setEmail("");
             setPassword("");
-          }, 5000);
+          }, 2000);
         }
       } catch (error) {
         setServerError(error.message);
@@ -75,6 +77,7 @@ function App() {
       }
     }
   };
+  
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 flex items-center justify-center p-4">
