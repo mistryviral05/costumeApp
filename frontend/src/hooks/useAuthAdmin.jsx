@@ -7,7 +7,8 @@ const useAuthAdmin = () => {
     useEffect(() => {
         const fetchAdmin = async () => {
             try {
-                const token = localStorage.getItem("token");
+                const tokenHole = JSON.parse(localStorage.getItem("token"));
+               const  token = tokenHole.token;
                 if (!token) {
                     // console.error("No token found in localStorage");
                     setLoading(false);

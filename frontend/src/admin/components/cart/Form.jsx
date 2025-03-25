@@ -94,7 +94,7 @@ const Form = ({ cartId }) => {
 
                         setTimeout(() => {
                             
-                            navigate('/admin/dashboard');
+                            navigate('/admin/CartsDe');
                         }, 1000);
                     }
                     

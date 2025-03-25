@@ -7,12 +7,13 @@ const useAuth = () => {
     useEffect(() => {
         const fetchUser = async () => {
             try {
-                const clientToken = localStorage.getItem("clientToken");
-                if (!clientToken) {
+                const token = JSON.parse(localStorage.getItem("clientToken"));
+                if (!token) {
                     // console.error("No token found in localStorage");
                     setLoading(false);
                     return;
                 }
+                const clientToken= token.token;
 
                 const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/clients/getClientById`, {
                     method: "GET",
@@ -28,8 +29,9 @@ const useAuth = () => {
                     setLoading(false);
                     return;
                 }
-
+                
                 const userData = await res.json();
+                
                 setUser(userData.message);
             } catch (error) {
                 // console.error("Error fetching user:", error);

@@ -15,7 +15,7 @@ import { toast } from 'sonner';
 
 const ProfilePage = () => {
   const { user } = useAuth();
-  
+    console.log(user)
   const [showPasswordForm, setShowPasswordForm] = useState(false);
   const [passwordData, setPasswordData] = useState({
     currentPassword: '',
@@ -60,7 +60,9 @@ const ProfilePage = () => {
 
     try {
 
-      const clientToken = localStorage.getItem('clientToken');
+      const token = JSON.parse(localStorage.getItem("clientToken"));
+  
+      const clientToken= token.token;
 
       if (clientToken) {
         const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/clients/changePassword`, {

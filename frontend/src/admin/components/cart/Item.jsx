@@ -44,7 +44,7 @@ const Cart = ({ setCartId }) => {
   const { user } = useAuth()
   const { admin } = useAuthAdmin()
 
-
+  console.log(user)
 
   const fetchAvailableCostumes = async () => {
     try {
